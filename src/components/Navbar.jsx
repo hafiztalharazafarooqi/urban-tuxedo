@@ -9,12 +9,7 @@ function Navbar() {
     <nav className="bg-white shadow-md">
       <div className="container-custom">
         <div className="flex justify-between items-center h-20">
-          <Link to="/" className="font-serif text-2xl font-bold flex justify-center items-center gap-3">
-            <img
-              src="../../public/logo.png"
-              alt="Urban Tuxedo"
-              className="w-24 h-32 object-cover rounded-md"
-            />
+          <Link to="/" className="font-serif text-2xl font-bold">
             Urban Tuxedo
           </Link>
 
