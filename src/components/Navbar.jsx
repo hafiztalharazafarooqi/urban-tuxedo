@@ -16,7 +16,7 @@ function Navbar() {
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/" className="hover:text-gold">Home</Link>
-            <Link to="/categories" className="hover:text-gold">Shop</Link>
+            <Link to="/category" className="hover:text-gold">Shop</Link>
             <Link to="/cart" className="hover:text-gold">
               <FiShoppingCart className="text-xl" />
             </Link>
