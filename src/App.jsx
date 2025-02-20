@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -20,6 +20,18 @@ import CustomerManagement from './admin/pages/CustomerManagement';
 import Reports from './admin/pages/Reports';
 import Settings from './admin/pages/Settings';
 
+function ClientLayout() {
+  return (
+    <>
+      <Navbar />
+      <main className="flex-grow">
+        <Outlet />
+      </main>
+      <Footer />
+    </>
+  );
+}
+
 function App() {
   return (
     <Router>
@@ -33,30 +45,20 @@ function App() {
           <Route path="customers" element={<CustomerManagement />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="category" element={<Categories />} />
         </Route>
 
         {/* Client Routes */}
-        <Route
-          path="/"
-          element={
-            <>
-              <Navbar />
-              <main className="flex-grow">
-                <Routes>
-                  <Route index element={<Home />} />
-                  <Route path="/categories" element={<Categories />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/profile" element={<Profile />} />
-                </Routes>
-              </main>
-              <Footer />
-            </>
-          }
-        />
+        <Route path="/" element={<ClientLayout />}>
+          <Route index element={<Home />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="product/:id" element={<ProductDetail />} />
+          <Route path="cart" element={<Cart />} />
+          <Route path="checkout" element={<Checkout />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="profile" element={<Profile />} />
+        </Route>
       </Routes>
     </Router>
   );
