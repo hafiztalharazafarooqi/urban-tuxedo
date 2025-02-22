@@ -1,16 +1,32 @@
-import { useState } from 'react';
-import { FiUser, FiPackage, FiHeart, FiSettings } from 'react-icons/fi';
+import { useState } from "react";
+import { FiUser, FiPackage, FiHeart, FiSettings } from "react-icons/fi";
 
 function Profile() {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState("profile");
+
+  const onLogout = async (e) => {
+    e.preventDefault();
+
+    try {
+      localStorage.removeItem("isLogin");
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout failed: ", error.message);
+    }
+  };
 
   return (
     <div className="container-custom py-12">
-      <h1 className="text-3xl font-serif mb-8">My Account</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-serif">My Account</h1>
+        <button type="submit" className="btn btn-primary" onClick={onLogout}>
+          Logout
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Sidebar */}
-        <div className="bg-white p-6 rounded-lg shadow-md h-fit">
+        {/* <div className="bg-white p-6 rounded-lg shadow-md h-fit">
           <nav className="space-y-2">
             <button
               className={`w-full flex items-center gap-3 px-4 py-2 rounded-md ${
@@ -49,17 +65,19 @@ function Profile() {
               Settings
             </button>
           </nav>
-        </div>
+        </div> */}
 
         {/* Main Content */}
-        <div className="md:col-span-3 bg-white p-6 rounded-lg shadow-md">
-          {activeTab === 'profile' && (
+        <div className="md:col-span-6 bg-white p-6 rounded-lg shadow-md">
+          {activeTab === "profile" && (
             <div className="space-y-6">
               <h2 className="text-2xl font-serif mb-4">Personal Information</h2>
               <form className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">First Name</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      First Name
+                    </label>
                     <input
                       type="text"
                       className="mt-1 w-full px-4 py-2 border rounded-md"
@@ -67,7 +85,9 @@ function Profile() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Last Name
+                    </label>
                     <input
                       type="text"
                       className="mt-1 w-full px-4 py-2 border rounded-md"
@@ -75,21 +95,23 @@ function Profile() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Email
+                    </label>
                     <input
                       type="email"
                       className="mt-1 w-full px-4 py-2 border rounded-md"
                       defaultValue="john.doe@example.com"
                     />
                   </div>
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700">Phone</label>
                     <input
                       type="tel"
                       className="mt-1 w-full px-4 py-2 border rounded-md"
                       defaultValue="+1 234 567 8900"
                     />
-                  </div>
+                  </div> */}
                 </div>
                 <button type="submit" className="btn btn-gold">
                   Save Changes
@@ -98,7 +120,7 @@ function Profile() {
             </div>
           )}
 
-          {activeTab === 'orders' && (
+          {activeTab === "orders" && (
             <div>
               <h2 className="text-2xl font-serif mb-4">Order History</h2>
               <div className="space-y-4">
@@ -107,7 +129,9 @@ function Profile() {
                     <div className="flex justify-between items-center mb-4">
                       <div>
                         <p className="font-medium">Order #{order}23456</p>
-                        <p className="text-sm text-gray-600">Placed on March 15, 2024</p>
+                        <p className="text-sm text-gray-600">
+                          Placed on March 15, 2024
+                        </p>
                       </div>
                       <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
                         Delivered
