@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { FiFilter, FiX } from "react-icons/fi";
 
 function Categories() {
+  const { category } = useParams(); // category will be "formal-wear" in this case
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
@@ -11,10 +12,15 @@ function Categories() {
   const [filteredProducts, setFilteredProducts] = useState([]);
 
   useEffect(() => {
+    console.log(category);
+    if(category){
+      setSelectedCategory(category.toLowerCase());
+    }
     getProducts();
   }, []);
 
   useEffect(() => {
+    
     applyFilters();
   }, [selectedCategory, priceRange, sortBy, products]);
 
@@ -90,7 +96,7 @@ function Categories() {
           <div>
             <h3 className="font-serif text-lg mb-3">Categories</h3>
             <div className="space-y-2">
-              {["All", "Tuxedos", "Suits", "Shirts", "Accessories"].map(
+              {["All", "Formal Wear", "Casual Wear", "Accessories"].map(
                 (category) => (
                   <label key={category} className="flex items-center">
                     <input

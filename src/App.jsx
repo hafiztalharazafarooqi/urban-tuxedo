@@ -59,6 +59,7 @@ function App() {
         <Route path="/" element={<ClientLayout />}>
           <Route index element={<Home />} />
           <Route path="category" element={<Categories />} />
+          <Route path="category/:category" element={<Categories />} />
           <Route path="product/:id" element={<ProductDetail />} />
           <Route path="cart" element={ <ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
