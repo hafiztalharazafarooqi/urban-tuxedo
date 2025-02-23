@@ -1,21 +1,62 @@
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 
 function Checkout() {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    paymentMethod: 'credit',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    paymentMethod: "credit",
   });
+
+  const [cartItems, setCartItems] = useState([]);
+  const [subtotal, setSubtotal] = useState(0);
+  const shippingCost = 15.0;
+
+  useEffect(() => {
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCartItems(storedCart);
+
+    // Calculate subtotal
+    const total = storedCart.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
+    );
+    setSubtotal(total);
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission
+
+    const orderData = {
+      customer: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        address: {
+          street: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+        },
+      },
+      paymentMethod: formData.paymentMethod,
+      items: cartItems,
+      totalAmount: subtotal + shippingCost,
+    };
+
+    console.log("Order Placed:", orderData);
+
+    // Here you can send `orderData` to your backend via an API request
   };
 
   return (
@@ -31,24 +72,36 @@ function Checkout() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
                   placeholder="First Name"
                   className="w-full px-4 py-2 border rounded-md"
                   required
                 />
                 <input
                   type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
                   placeholder="Last Name"
                   className="w-full px-4 py-2 border rounded-md"
                   required
                 />
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   placeholder="Email"
                   className="w-full px-4 py-2 border rounded-md"
                   required
                 />
                 <input
                   type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
                   placeholder="Phone"
                   className="w-full px-4 py-2 border rounded-md"
                   required
@@ -62,6 +115,9 @@ function Checkout() {
               <div className="space-y-4">
                 <input
                   type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
                   placeholder="Street Address"
                   className="w-full px-4 py-2 border rounded-md"
                   required
@@ -69,18 +125,27 @@ function Checkout() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <input
                     type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
                     placeholder="City"
                     className="w-full px-4 py-2 border rounded-md"
                     required
                   />
                   <input
                     type="text"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleChange}
                     placeholder="State"
                     className="w-full px-4 py-2 border rounded-md"
                     required
                   />
                   <input
                     type="text"
+                    name="zipCode"
+                    value={formData.zipCode}
+                    onChange={handleChange}
                     placeholder="ZIP Code"
                     className="w-full px-4 py-2 border rounded-md"
                     required
@@ -96,10 +161,10 @@ function Checkout() {
                 <label className="flex items-center">
                   <input
                     type="radio"
-                    name="payment"
+                    name="paymentMethod"
                     value="credit"
-                    checked={formData.paymentMethod === 'credit'}
-                    onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+                    checked={formData.paymentMethod === "credit"}
+                    onChange={handleChange}
                     className="mr-2"
                   />
                   Credit Card
@@ -107,13 +172,13 @@ function Checkout() {
                 <label className="flex items-center">
                   <input
                     type="radio"
-                    name="payment"
+                    name="paymentMethod"
                     value="paypal"
-                    checked={formData.paymentMethod === 'paypal'}
-                    onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+                    checked={formData.paymentMethod === "paypal"}
+                    onChange={handleChange}
                     className="mr-2"
                   />
-                  PayPal
+                  Cash of Delivery
                 </label>
               </div>
             </div>
@@ -130,16 +195,16 @@ function Checkout() {
           <div className="space-y-4">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>$689.98</span>
+              <span>${subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
-              <span>$15.00</span>
+              <span>${shippingCost.toFixed(2)}</span>
             </div>
             <div className="border-t pt-4">
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
-                <span>$704.98</span>
+                <span>${(subtotal + shippingCost).toFixed(2)}</span>
               </div>
             </div>
           </div>

@@ -1,23 +1,23 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     remember: false,
   });
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
@@ -25,25 +25,31 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await fetch('https://urban-tuxedo-backend.vercel.app/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
+      const response = await fetch(
+        "https://urban-tuxedo-backend.vercel.app/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
         setMessage(`Login failed: ${errorData.message || response.statusText}`);
       } else {
         const data = await response.json();
-        toast.success('Login successful!');
-        localStorage.setItem('isLogin', JSON.stringify(data));
-        
+        toast.success("Login successful!");
+        localStorage.setItem("isLogin", JSON.stringify(data));
+
         setTimeout(() => {
-          navigate('/');
+          const redirectUrl = localStorage.getItem("redirectAfterLogin") || "/";
+          localStorage.removeItem("redirectAfterLogin"); // Clear after use
+          navigate(redirectUrl);
+          // navigate('/');
         }, 2000);
       }
     } catch (error) {
@@ -63,7 +69,10 @@ function Login() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <input
@@ -77,7 +86,10 @@ function Login() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <input
@@ -102,7 +114,10 @@ function Login() {
                 onChange={handleChange}
                 className="h-4 w-4 text-gold focus:ring-gold border-gray-300 rounded"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+              <label
+                htmlFor="remember-me"
+                className="ml-2 block text-sm text-gray-900"
+              >
                 Remember me
               </label>
             </div>
@@ -119,12 +134,14 @@ function Login() {
           </button>
 
           <p className="text-center text-sm">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{" "}
             <Link to="/register" className="text-gold hover:text-gold-light">
               Sign up
             </Link>
           </p>
-          {message && <p className="text-center text-sm mt-4 text-red-600">{message}</p>}
+          {message && (
+            <p className="text-center text-sm mt-4 text-red-600">{message}</p>
+          )}
         </form>
       </div>
     </div>
