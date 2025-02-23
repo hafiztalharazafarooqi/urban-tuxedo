@@ -8,10 +8,15 @@ function Categories() {
   const [priceRange, setPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
   useEffect(() => {
     getProducts();
   }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [selectedCategory, priceRange, sortBy, products]);
 
   const getProducts = async () => {
     try {
@@ -23,12 +28,41 @@ function Categories() {
         }
       );
       const data = await response.json();
-      console.log(data);
       setProducts(data.products);
-      console.log(response);
     } catch (error) {
-      console.warn(`Login failed: ${error.message}`);
+      console.warn(`Fetching products failed: ${error.message}`);
     }
+  };
+
+  const applyFilters = () => {
+    let filtered = [...products];
+
+    // Filter by category
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((item) => item.category === selectedCategory);
+    }
+
+    // Filter by price range
+    if (priceRange !== "all") {
+      filtered = filtered.filter((item) => {
+        const price = item.price;
+        if (priceRange === "under-500") return price < 500;
+        if (priceRange === "500-1000") return price >= 500 && price <= 1000;
+        if (priceRange === "over-1000") return price > 1000;
+        return true;
+      });
+    }
+
+    // Sorting
+    if (sortBy === "price-low") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "price-high") {
+      filtered.sort((a, b) => b.price - a.price);
+    } else if (sortBy === "newest") {
+      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    setFilteredProducts(filtered);
   };
 
   return (
@@ -118,26 +152,36 @@ function Categories() {
 
           {/* Products */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {products.map((item) => (
-              <Link key={item._id} to={`/product/${item._id}`} className="group">
-                <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={item.images.primary}
-                      alt="Product"
-                      className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((item) => (
+                <Link
+                  key={item._id}
+                  to={`/product/${item._id}`}
+                  className="group"
+                >
+                  <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={item.images.primary}
+                        alt="Product"
+                        className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-serif text-lg mb-2">{item.title}</h3>
+                      <p className="text-gray-600 mb-2">${item.price}</p>
+                      <button className="btn btn-primary w-full">
+                        View Details
+                      </button>
+                    </div>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-serif text-lg mb-2">{item.title}</h3>
-                    <p className="text-gray-600 mb-2">{item.price}</p>
-                    <button className="btn btn-primary w-full">
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))
+            ) : (
+              <p className="text-gray-500 text-center col-span-3">
+                No products found matching your criteria.
+              </p>
+            )}
           </div>
         </div>
       </div>

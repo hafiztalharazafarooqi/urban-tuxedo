@@ -47,6 +47,8 @@ function Login() {
 
         setTimeout(() => {
           const redirectUrl = localStorage.getItem("redirectAfterLogin") || "/";
+          console.log(redirectUrl);
+          
           localStorage.removeItem("redirectAfterLogin"); // Clear after use
           navigate(redirectUrl);
           // navigate('/');
