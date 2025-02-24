@@ -120,9 +120,9 @@ function Categories() {
             <div className="space-y-2">
               {[
                 { label: "All", value: "all" },
-                { label: "Under $500", value: "under-500" },
-                { label: "$500 - $1000", value: "500-1000" },
-                { label: "Over $1000", value: "over-1000" },
+                { label: "Under 500", value: "under-500" },
+                { label: "500 - 1000", value: "500-1000" },
+                { label: "Over 1000", value: "over-1000" },
               ].map((range) => (
                 <label key={range.value} className="flex items-center">
                   <input

@@ -39,7 +39,7 @@ function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <DashboardCard
             title="Total Revenue"
-            value="$24,560"
+            value="24,560"
             change="+12.5% from last month"
             icon={FiDollarSign}
           />
@@ -143,7 +143,7 @@ function Dashboard() {
                     Classic Black Tuxedo
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    $599.99
+                    599.99
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">

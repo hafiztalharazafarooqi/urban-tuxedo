@@ -40,7 +40,7 @@ function Home() {
               Discover our premium collection of handcrafted tuxedos and formal
               wear.
             </p>
-            <Link to="/categories" className="btn btn-gold">
+            <Link to="/category" className="btn btn-gold">
               Shop Collection
             </Link>
           </div>

@@ -98,7 +98,7 @@ function CustomerManagement() {
                     {customer.orders}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    ${customer.totalSpent.toFixed(2)}
+                    {customer.totalSpent.toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button className="text-blue-600 hover:text-blue-900">

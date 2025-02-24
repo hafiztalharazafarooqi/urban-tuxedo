@@ -208,7 +208,7 @@ function ProductManagement() {
                     <div className="text-sm text-gray-900">{product.category}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">${product.price}</div>
+                    <div className="text-sm text-gray-900">{product.price}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{product.stock}</div>

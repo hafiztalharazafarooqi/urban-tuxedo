@@ -171,12 +171,12 @@ function Reports() {
                 <tr key={month.month}>
                   <td className="px-6 py-4 whitespace-nowrap">{month.month}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    ${month.revenue.toLocaleString()}
+                    {month.revenue.toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {Math.floor(month.revenue / 500)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">$500</td>
+                  <td className="px-6 py-4 whitespace-nowrap">500</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                       +5.2%

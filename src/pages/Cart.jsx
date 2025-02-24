@@ -68,7 +68,7 @@ function Cart() {
                   </button>
                 </div>
                 {/* <p className="text-gray-600 mb-2">Size: {item.size}</p> */}
-                <p className="text-gold font-medium">${item.price}</p>
+                <p className="text-gold font-medium">{item.price}</p>
                 <div className="flex items-center gap-4 mt-4">
                   <button
                     className="p-1 hover:text-gold"
@@ -95,16 +95,16 @@ function Cart() {
           <div className="space-y-4">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
-              <span>${shipping.toFixed(2)}</span>
+              <span>{shipping.toFixed(2)}</span>
             </div>
             <div className="border-t pt-4">
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>{total.toFixed(2)}</span>
               </div>
             </div>
             <Link to="/checkout" className="btn btn-gold w-full text-center">
