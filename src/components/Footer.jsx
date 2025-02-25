@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom';
-import { FiInstagram, FiFacebook, FiTwitter } from 'react-icons/fi';
 
 function Footer() {
   return (
@@ -10,7 +8,7 @@ function Footer() {
             <h3 className="text-xl font-serif mb-4">M&A TRADAX LIMITED</h3>
             <p className="text-gray-300">
               {/* 69 Wilshaw Lane Ashton-Under-Lyne  */}
-              OL7 9QX.
+              {/* OL7 9QX. */}
             </p>
           </div>
           
