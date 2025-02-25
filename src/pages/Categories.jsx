@@ -52,9 +52,9 @@ function Categories() {
     if (priceRange !== "all") {
       filtered = filtered.filter((item) => {
         const price = item.price;
-        if (priceRange === "under-500") return price < 500;
-        if (priceRange === "500-1000") return price >= 500 && price <= 1000;
-        if (priceRange === "over-1000") return price > 1000;
+        if (priceRange === "under-25") return price < 25;
+        if (priceRange === "25-35") return price >= 25 && price <= 35;
+        if (priceRange === "over-35") return price > 35;
         return true;
       });
     }
@@ -120,9 +120,9 @@ function Categories() {
             <div className="space-y-2">
               {[
                 { label: "All", value: "all" },
-                { label: "Under 500", value: "under-500" },
-                { label: "500 - 1000", value: "500-1000" },
-                { label: "Over 1000", value: "over-1000" },
+                { label: "Under 25", value: "under-25" },
+                { label: "25 - 35", value: "25-35" },
+                { label: "Over 35", value: "over-35" },
               ].map((range) => (
                 <label key={range.value} className="flex items-center">
                   <input
@@ -185,7 +185,7 @@ function Categories() {
               ))
             ) : (
               <p className="text-gray-500 text-center col-span-3">
-                No products found matching your criteria.
+                {/* No products found matching your criteria. */}
               </p>
             )}
           </div>
