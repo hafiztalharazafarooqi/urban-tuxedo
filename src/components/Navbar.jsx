@@ -13,6 +13,10 @@ function Navbar() {
     setCartCount(total);
   };
 
+  setInterval(() => {
+    updateCartCount()
+  }, 2000);
+
   useEffect(() => {
     updateCartCount();
 

@@ -99,7 +99,7 @@ function Cart() {
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
-              <span>{shipping.toFixed(2)}</span>
+              <span>{ shipping.toFixed(2)}</span>
             </div>
             <div className="border-t pt-4">
               <div className="flex justify-between font-semibold">
@@ -107,9 +107,10 @@ function Cart() {
                 <span>{total.toFixed(2)}</span>
               </div>
             </div>
-            <Link to="/checkout" className="btn btn-gold w-full text-center">
+            {cartItems && cartItems.lenght ?
+            <Link to="/checkout"  className="btn btn-gold w-full text-center">
               Proceed to Checkout
-            </Link>
+            </Link> : ''}
           </div>
         </div>
       </div>

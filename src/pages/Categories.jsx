@@ -168,7 +168,7 @@ function Categories() {
                   <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                     <div className="relative overflow-hidden">
                       <img
-                        src={item.images.primary}
+                        src={item.image.primary}
                         alt="Product"
                         className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
                       />

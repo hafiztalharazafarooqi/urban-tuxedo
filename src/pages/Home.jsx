@@ -119,8 +119,8 @@ function Home() {
                   className="bg-white shadow-lg rounded-lg overflow-hidden"
                 >
                   <img
-                    src={item.images.primary}
-                    alt={item.images.primary}
+                    src={item.image.primary}
+                    alt={item.image.primary}
                     className="w-full h-64 object-cover"
                   />
                   <div className="p-4">

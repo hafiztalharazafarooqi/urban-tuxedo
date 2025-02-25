@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Checkout() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -10,12 +13,16 @@ function Checkout() {
     city: "",
     state: "",
     zipCode: "",
-    paymentMethod: "credit",
+    paymentMethod: "cod",
   });
 
   const [cartItems, setCartItems] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
   const shippingCost = 15.0;
+
+  // Popup state
+  const [orderId, setOrderId] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -55,8 +62,18 @@ function Checkout() {
     };
 
     console.log("Order Placed:", orderData);
+    // Generate a random order ID (for demo purposes)
+    const generatedOrderId = Math.floor(Math.random() * 1000000);
+    setOrderId(generatedOrderId);
+    setShowPopup(true);
 
     // Here you can send `orderData` to your backend via an API request
+  };
+
+  const handleClosePopup = () => {
+    localStorage.removeItem('cart');
+    setShowPopup(false);
+    navigate("/");
   };
 
   return (
@@ -162,23 +179,12 @@ function Checkout() {
                   <input
                     type="radio"
                     name="paymentMethod"
-                    value="credit"
-                    checked={formData.paymentMethod === "credit"}
+                    value="cod"
+                    checked={formData.paymentMethod === "cod"}
                     onChange={handleChange}
                     className="mr-2"
                   />
-                  Credit Card
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="paypal"
-                    checked={formData.paymentMethod === "paypal"}
-                    onChange={handleChange}
-                    className="mr-2"
-                  />
-                  Cash of Delivery
+                  Cash on Delivery
                 </label>
               </div>
             </div>
@@ -195,21 +201,41 @@ function Checkout() {
           <div className="space-y-4">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>{subtotal.toFixed(2)}</span>
+              <span>${subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
-              <span>{shippingCost.toFixed(2)}</span>
+              <span>${shippingCost.toFixed(2)}</span>
             </div>
             <div className="border-t pt-4">
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
-                <span>{(subtotal + shippingCost).toFixed(2)}</span>
+                <span>${(subtotal + shippingCost).toFixed(2)}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Popup Modal */}
+      {showPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div
+            className="absolute inset-0 bg-black opacity-50"
+            onClick={handleClosePopup}
+          ></div>
+          <div className="bg-white p-8 rounded-lg shadow-lg z-10 max-w-sm mx-auto text-center">
+            <h2 className="text-2xl font-bold mb-4">Order Placed!</h2>
+            <p className="mb-6">Your order ID is {orderId}</p>
+            <button
+              onClick={handleClosePopup}
+              className="btn btn-gold px-6 py-2"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
