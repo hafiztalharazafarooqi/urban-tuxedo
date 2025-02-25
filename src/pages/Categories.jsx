@@ -45,7 +45,7 @@ function Categories() {
 
     // Filter by category
     if (selectedCategory !== "all") {
-      filtered = filtered.filter((item) => item.category === selectedCategory);
+      filtered = filtered.filter((item) => item.categories.toLowerCase()?.includes(selectedCategory?.toLowerCase()));
     }
 
     // Filter by price range
@@ -175,7 +175,7 @@ function Categories() {
                     </div>
                     <div className="p-4">
                       <h3 className="font-serif text-lg mb-2">{item.title}</h3>
-                      <p className="text-gray-600 mb-2">${item.price}</p>
+                      <p className="text-gray-600 mb-2">£{item.price}</p>
                       <button className="btn btn-primary w-full">
                         View Details
                       </button>

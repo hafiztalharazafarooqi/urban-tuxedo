@@ -53,7 +53,7 @@ function Cart() {
           {cartItems.map((item) => (
             <div key={item.id} className="flex gap-6 bg-white p-6 rounded-lg shadow-md">
               <img
-                src={item.image}
+                src={item.image.primary}
                 alt={item.title}
                 className="w-24 h-32 object-cover rounded-md"
               />
@@ -68,7 +68,7 @@ function Cart() {
                   </button>
                 </div>
                 {/* <p className="text-gray-600 mb-2">Size: {item.size}</p> */}
-                <p className="text-gold font-medium">{item.price}</p>
+                <p className="text-gold font-medium">£{item.price}</p>
                 <div className="flex items-center gap-4 mt-4">
                   <button
                     className="p-1 hover:text-gold"
@@ -95,22 +95,21 @@ function Cart() {
           <div className="space-y-4">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>{subtotal.toFixed(2)}</span>
+              <span>£{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
-              <span>{ shipping.toFixed(2)}</span>
+              <span>£{ shipping.toFixed(2)}</span>
             </div>
             <div className="border-t pt-4">
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
-                <span>{total.toFixed(2)}</span>
+                <span>£{total.toFixed(2)}</span>
               </div>
             </div>
-            {cartItems && cartItems.lenght ?
             <Link to="/checkout"  className="btn btn-gold w-full text-center">
               Proceed to Checkout
-            </Link> : ''}
+            </Link>
           </div>
         </div>
       </div>

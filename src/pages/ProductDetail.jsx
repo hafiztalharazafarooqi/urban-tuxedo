@@ -88,7 +88,7 @@ function ProductDetail() {
             <h1 className="text-3xl font-serif mb-4">
               {selctedProduct?.title}
             </h1>
-            <p className="text-2xl text-gold mb-6">{selctedProduct?.price}</p>
+            <p className="text-2xl text-gold mb-6">£{selctedProduct?.price}</p>
 
             <div className="space-y-6">
               <div>

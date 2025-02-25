@@ -201,16 +201,16 @@ function Checkout() {
           <div className="space-y-4">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>£{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
-              <span>${shippingCost.toFixed(2)}</span>
+              <span>£{shippingCost.toFixed(2)}</span>
             </div>
             <div className="border-t pt-4">
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
-                <span>${(subtotal + shippingCost).toFixed(2)}</span>
+                <span>£{(subtotal + shippingCost).toFixed(2)}</span>
               </div>
             </div>
           </div>
