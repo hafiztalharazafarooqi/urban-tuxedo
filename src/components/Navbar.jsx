@@ -5,6 +5,9 @@ import { FiMenu, FiX, FiShoppingCart, FiUser } from "react-icons/fi";
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    !!localStorage.getItem("isLogin")
+  );
 
   // Function to update the cart count from localStorage
   const updateCartCount = () => {
@@ -13,16 +16,24 @@ function Navbar() {
     setCartCount(total);
   };
 
-  setInterval(() => {
-    updateCartCount()
-  }, 2000);
-
+  // Replace setInterval with useEffect for better performance
   useEffect(() => {
+    // Initial update
     updateCartCount();
 
-    // Optional: Listen to the storage event to update the count if localStorage changes from another tab
-    const handleStorageChange = () => {
+    // Set up interval for periodic updates
+    const interval = setInterval(() => {
       updateCartCount();
+      // isUserLoggedIn = !!localStorage.getItem("isLogin");
+    }, 2000);
+
+    // Clean up interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsLoggedIn(!!localStorage.getItem("isLogin"));
     };
 
     window.addEventListener("storage", handleStorageChange);
@@ -31,69 +42,99 @@ function Navbar() {
 
   return (
     <nav className="bg-white shadow-md">
-      <div className="container-custom">
+      <div className="container-custom mx-auto px-4">
         <div className="flex justify-between items-center h-20">
+          {/* Logo */}
           <Link to="/" className="font-serif text-2xl font-bold">
             Urban Tuxedo
           </Link>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="hover:text-gold">
+            <Link to="/" className="hover:text-red-500 transition-colors">
               Home
             </Link>
-            <Link to="/category" className="hover:text-gold">
+            <Link
+              to="/category"
+              className="hover:text-red-500 transition-colors"
+            >
               Shop
             </Link>
-            <Link to="/cart" className="relative hover:text-gold">
-              <FiShoppingCart className="text-xl" />
+            <Link
+              to="/cart"
+              className="relative hover:text-red-500 transition-colors"
+            >
+              <FiShoppingCart size={20} />
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {cartCount}
                 </span>
               )}
             </Link>
             <Link
-              to={localStorage.getItem("isLogin") ? "/profile" : "/login"}
-              className="hover:text-gold"
+              to="/profile"
+              className="hover:text-red-500 transition-colors"
             >
-              <FiUser className="text-xl" />
+              {isLoggedIn ? (
+                <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center shadow-md">
+                  <span className="text-3xl font-bold text-red-500">JD</span>
+                </div>
+              ) : (
+              <FiUser size={20} />
+              )}
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? (
-              <FiX className="text-2xl" />
-            ) : (
-              <FiMenu className="text-2xl" />
-            )}
+          <button
+            className="md:hidden text-gray-600 focus:outline-none"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
         </div>
-
-        {/* Mobile Menu */}
-        {isOpen && (
-          <div className="md:hidden pb-4">
-            <div className="flex flex-col space-y-4">
-              <Link to="/" className="hover:text-gold">
-                Home
-              </Link>
-              <Link to="/categories" className="hover:text-gold">
-                Shop
-              </Link>
-              <Link to="/cart" className="hover:text-gold">
-                Cart
-              </Link>
-              <Link
-                to={localStorage.getItem("isLogin") ? "/profile" : "/login"}
-                className="hover:text-gold"
-              >
-                <FiUser className="text-xl" />
-              </Link>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="md:hidden bg-white shadow-inner">
+          <div className="container-custom mx-auto px-4 py-4 space-y-4">
+            <Link
+              to="/"
+              className="block hover:text-red-500 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              to="/category"
+              className="block hover:text-red-500 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              Shop
+            </Link>
+            <Link
+              to="/cart"
+              className="block hover:text-red-500 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              Cart{" "}
+              {cartCount > 0 && (
+                <span className="ml-2 bg-gold text-white text-xs rounded-full px-2 py-1">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            <Link
+              to="/profile"
+              className="block hover:text-red-500 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              Account
+            </Link>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

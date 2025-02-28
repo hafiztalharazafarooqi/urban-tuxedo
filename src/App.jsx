@@ -26,6 +26,7 @@ import CustomerManagement from "./admin/pages/CustomerManagement";
 import Reports from "./admin/pages/Reports";
 import Settings from "./admin/pages/Settings";
 import ProtectedRoute from "./core/protected-route";
+import ForgetPassword from "./pages/ForgetPassword";
 
 function ClientLayout() {
   return (
@@ -65,6 +66,7 @@ function App() {
           <Route path="checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="forget-password" element={<ForgetPassword />} />
           <Route
             path="profile"
             element={
