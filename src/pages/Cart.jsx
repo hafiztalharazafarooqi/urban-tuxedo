@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiTrash2, FiMinus, FiPlus } from 'react-icons/fi';
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, ChevronLeft } from 'lucide-react';
 
 function Cart() {
   const [cartItems, setCartItems] = useState(() => {
@@ -44,72 +44,143 @@ function Cart() {
   const shipping = 15.00;
   const total = subtotal + shipping;
 
-  return (
-    <div className="container-custom py-12">
-      <h1 className="text-3xl font-serif mb-8">Shopping Cart</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* Cart Items */}
-        <div className="lg:col-span-2 space-y-6">
-          {cartItems.map((item) => (
-            <div key={item.id} className="flex gap-6 bg-white p-6 rounded-lg shadow-md">
-              <img
-                src={item.image.primary}
-                alt={item.title}
-                className="w-24 h-32 object-cover rounded-md"
-              />
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <h3 className="font-serif text-lg">{item.title}</h3>
-                  <button
-                    className="text-red-500 hover:text-red-700"
-                    onClick={() => handleRemove(item.id)}
-                  >
-                    <FiTrash2 />
-                  </button>
-                </div>
-                {/* <p className="text-gray-600 mb-2">Size: {item.size}</p> */}
-                <p className="text-gold font-medium">£{item.price}</p>
-                <div className="flex items-center gap-4 mt-4">
-                  <button
-                    className="p-1 hover:text-gold"
-                    onClick={() => handleDecrement(item.id)}
-                  >
-                    <FiMinus />
-                  </button>
-                  <span>{item.quantity}</span>
-                  <button
-                    className="p-1 hover:text-gold"
-                    onClick={() => handleIncrement(item.id)}
-                  >
-                    <FiPlus />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+  // Empty cart state
+  if (cartItems.length === 0) {
+    return (
+      <div className="container mx-auto py-24 px-6">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <ShoppingBag className="h-12 w-12 text-gray-400" />
+          </div>
+          <h1 className="text-3xl font-bold mb-4">Your Cart is Empty</h1>
+          <p className="text-gray-600 mb-8">Looks like you haven&apos;t added any items to your cart yet.</p>
+          <Link 
+            to="/shop" 
+            className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          >
+            Continue Shopping
+          </Link>
         </div>
+      </div>
+    );
+  }
 
-        {/* Order Summary */}
-        <div className="bg-white p-6 rounded-lg shadow-md h-fit">
-          <h2 className="font-serif text-xl mb-6">Order Summary</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>£{subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Shipping</span>
-              <span>£{ shipping.toFixed(2)}</span>
-            </div>
-            <div className="border-t pt-4">
-              <div className="flex justify-between font-semibold">
-                <span>Total</span>
-                <span>£{total.toFixed(2)}</span>
+  return (
+    <div className="bg-gray-50 min-h-screen">
+      <div className="container mx-auto py-16 px-6">
+        <div className="flex items-center mb-8">
+          <Link to="/shop" className="text-gray-600 hover:text-red-500 flex items-center gap-1 transition">
+            <ChevronLeft className="h-4 w-4" />
+            <span>Continue Shopping</span>
+          </Link>
+          <h1 className="text-3xl font-bold text-center flex-1">Your Shopping Cart</h1>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Cart Items */}
+          <div className="lg:col-span-2 space-y-6">
+            {cartItems.map((item) => (
+              <div 
+                key={item.id} 
+                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden group"
+              >
+                <div className="flex gap-6">
+                  <div className="w-24 h-32 overflow-hidden rounded-lg">
+                    <img
+                      src={item.image.primary}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between">
+                      <h3 className="text-lg font-medium">{item.title}</h3>
+                      <button
+                        className="text-gray-400 hover:text-red-500 transition"
+                        onClick={() => handleRemove(item.id)}
+                        aria-label="Remove item"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                    <p className="text-red-500 font-medium mt-1">£{item.price}</p>
+                    
+                    <div className="flex items-center gap-4 mt-4">
+                      <div className="flex items-center border border-gray-200 rounded-full overflow-hidden">
+                        <button
+                          className="p-2 hover:bg-gray-100 transition"
+                          onClick={() => handleDecrement(item.id)}
+                          aria-label="Decrease quantity"
+                        >
+                          <Minus className="h-4 w-4" />
+                        </button>
+                        <span className="px-4 font-medium">{item.quantity}</span>
+                        <button
+                          className="p-2 hover:bg-gray-100 transition"
+                          onClick={() => handleIncrement(item.id)}
+                          aria-label="Increase quantity"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <span className="text-gray-500 text-sm">
+                        Total: £{(item.price * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Order Summary */}
+          <div>
+            <div className="bg-white p-6 rounded-xl shadow-sm sticky top-24">
+              <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+              <div className="space-y-4">
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal ({cartItems.reduce((acc, item) => acc + item.quantity, 0)} items)</span>
+                  <span>£{subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Shipping</span>
+                  <span>£{shipping.toFixed(2)}</span>
+                </div>
+                <div className="border-t border-gray-100 pt-4 mt-4">
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total</span>
+                    <span>£{total.toFixed(2)}</span>
+                  </div>
+                  <p className="text-gray-500 text-sm mt-1">Including VAT</p>
+                </div>
+                
+                <Link 
+                  to="/checkout" 
+                  className="w-full mt-6 px-6 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
+                >
+                  <span>Proceed to Checkout</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                
+                <div className="mt-6 space-y-4">
+                  <h3 className="font-medium text-gray-900">We Accept</h3>
+                  <div className="flex gap-2">
+                    <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
+                      <span className="text-xs font-medium">Visa</span>
+                    </div>
+                    <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
+                      <span className="text-xs font-medium">MC</span>
+                    </div>
+                    <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
+                      <span className="text-xs font-medium">Amex</span>
+                    </div>
+                    <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
+                      <span className="text-xs font-medium">PayPal</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <Link to="/checkout"  className="btn btn-gold w-full text-center">
-              Proceed to Checkout
-            </Link>
           </div>
         </div>
       </div>
