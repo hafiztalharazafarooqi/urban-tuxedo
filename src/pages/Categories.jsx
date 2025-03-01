@@ -10,29 +10,26 @@ function Categories() {
   const [sortBy, setSortBy] = useState("featured");
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     console.log(category);
-    if(category){
+    if (category) {
       setSelectedCategory(category.toLowerCase());
     }
     getProducts();
   }, []);
 
   useEffect(() => {
-    
     applyFilters();
-  }, [selectedCategory, priceRange, sortBy, products]);
+  }, [selectedCategory, priceRange, sortBy, products, applyFilters]);
 
   const getProducts = async () => {
     try {
-      const response = await fetch(
-        "https://urban-tuxedo-backend.vercel.app/api/products",
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await fetch(`${BACKEND_URL}/products`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
       const data = await response.json();
       setProducts(data.products);
     } catch (error) {
@@ -45,7 +42,9 @@ function Categories() {
 
     // Filter by category
     if (selectedCategory !== "all") {
-      filtered = filtered.filter((item) => item.categories.toLowerCase()?.includes(selectedCategory?.toLowerCase()));
+      filtered = filtered.filter((item) =>
+        item.categories.toLowerCase()?.includes(selectedCategory?.toLowerCase())
+      );
     }
 
     // Filter by price range
