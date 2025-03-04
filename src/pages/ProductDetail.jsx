@@ -15,6 +15,7 @@ function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState("");
 
   const handleAddToCart = () => {
+    console.log(isUserLoggedIn);
     if (isUserLoggedIn) {
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
       const existingIndex = cart.findIndex(
@@ -67,14 +68,12 @@ function ProductDetail() {
 
   const getSelectedProduct = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(
-        `https://urban-tuxedo-backend.vercel.app/api/products/${id}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const BACKEND_URL = import.meta.env.VITE_API_URL;
+
+      const response = await fetch(`${BACKEND_URL}/products/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
       const data = await response.json();
       setSelectedProduct(data.product);
     } catch (error) {

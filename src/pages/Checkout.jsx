@@ -79,7 +79,7 @@ function Checkout() {
   };
 
   const handleClosePopup = () => {
-    localStorage.removeItem('cart');
+    localStorage.removeItem("cart");
     setShowPopup(false);
     navigate("/");
   };

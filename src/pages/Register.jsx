@@ -51,7 +51,9 @@ function Register() {
     };
 
     try {
-      const response = await fetch("https://urban-tuxedo-backend.vercel.app/api/auth/register", {
+      const BACKEND_URL = import.meta.env.VITE_API_URL;
+
+      const response = await fetch(`${BACKEND_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

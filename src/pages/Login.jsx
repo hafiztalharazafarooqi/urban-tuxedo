@@ -24,21 +24,17 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage("");
+    const BACKEND_URL = import.meta.env.VITE_API_URL;
 
     try {
-      const response = await fetch(
-        "https://urban-tuxedo-backend.vercel.app/api/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
-        }
-      );
+      const response = await fetch(`${BACKEND_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -51,7 +47,9 @@ function Login() {
 
         setTimeout(() => {
           const redirectUrl = localStorage.getItem("redirectAfterLogin") || "/";
-          localStorage.removeItem("redirectAfterLogin");
+          console.log(redirectUrl);
+
+          localStorage.removeItem("redirectAfterLogin"); // Clear after use
           navigate(redirectUrl);
         }, 2000);
       }
