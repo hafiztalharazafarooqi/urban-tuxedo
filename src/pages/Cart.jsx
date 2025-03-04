@@ -55,7 +55,7 @@ function Cart() {
           <h1 className="text-3xl font-bold mb-4">Your Cart is Empty</h1>
           <p className="text-gray-600 mb-8">Looks like you haven&apos;t added any items to your cart yet.</p>
           <Link 
-            to="/shop" 
+            to="/Category" 
             className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
             Continue Shopping
@@ -69,7 +69,7 @@ function Cart() {
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto py-16 px-6">
         <div className="flex items-center mb-8">
-          <Link to="/shop" className="text-gray-600 hover:text-red-500 flex items-center gap-1 transition">
+          <Link to="/Category" className="text-gray-600 hover:text-red-500 flex items-center gap-1 transition">
             <ChevronLeft className="h-4 w-4" />
             <span>Continue Shopping</span>
           </Link>
@@ -87,7 +87,7 @@ function Cart() {
                 <div className="flex gap-6">
                   <div className="w-24 h-32 overflow-hidden rounded-lg">
                     <img
-                      src={item.image.primary}
+                      src={item.images?.primary}
                       alt={item.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                     />

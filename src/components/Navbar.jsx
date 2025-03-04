@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FiMenu, FiX, FiShoppingCart, FiUser } from "react-icons/fi";
+import { FiMenu, FiX, FiShoppingCart, FiUser, FiLogIn } from "react-icons/fi";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -76,11 +76,12 @@ function Navbar() {
               className="hover:text-red-500 transition-colors"
             >
               {isLoggedIn ? (
-                <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center shadow-md">
-                  <span className="text-3xl font-bold text-red-500">JD</span>
-                </div>
+                // <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center shadow-md">
+                //   <span className="text-3xl font-bold text-red-500">JD</span>
+                // </div>
+                <FiUser size={20} />
               ) : (
-              <FiUser size={20} />
+                <FiLogIn size={20} />
               )}
             </Link>
           </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
+import AddProductForm from './AddProduct';
 
 function ProductManagement() {
   const [products, setProducts] = useState([
@@ -44,15 +45,17 @@ function ProductManagement() {
   });
 
   const handleAddProduct = (e) => {
-    e.preventDefault();
-    const product = {
-      id: products.length + 1,
-      ...newProduct,
-      status: Number(newProduct.stock) > 0 ? 'In Stock' : 'Out of Stock',
-    };
-    setProducts([...products, product]);
+    console.log(e);
     setShowAddModal(false);
-    setNewProduct({ name: '', category: '', price: '', stock: '' });
+    
+    // e.preventDefault();
+    // const product = {
+    //   id: products.length + 1,
+    //   ...newProduct,
+    //   status: Number(newProduct.stock) > 0 ? 'In Stock' : 'Out of Stock',
+    // };
+    // setProducts([...products, product]);
+    // setNewProduct({ name: '', category: '', price: '', stock: '' });
   };
 
   const handleEditProduct = (product) => {
@@ -105,6 +108,10 @@ function ProductManagement() {
     const matchesStatus = !statusFilter || product.status.toLowerCase().includes(statusFilter.toLowerCase());
     return matchesSearch && matchesCategory && matchesStatus;
   });
+
+  const setShowProductModal = () => {
+    setShowAddModal(false);
+  };
 
   return (
     <div className="space-y-8">
@@ -292,91 +299,7 @@ function ProductManagement() {
 
       {/* Add Product Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-serif">Add New Product</h2>
-              <button 
-                onClick={() => setShowAddModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <FiX size={24} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleAddProduct} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Product Name
-                </label>
-                <input
-                  type="text"
-                  value={newProduct.name}
-                  onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-md"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category
-                </label>
-                <select
-                  value={newProduct.category}
-                  onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-md"
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={newProduct.price}
-                  onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-md"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Stock
-                </label>
-                <input
-                  type="number"
-                  value={newProduct.stock}
-                  onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-md"
-                  required
-                />
-              </div>
-              
-              <div className="flex justify-end gap-4 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="btn btn-primary"
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-gold">
-                  Add Product
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <AddProductForm onAddProduct={handleAddProduct}/>
       )}
 
       {/* Edit Product Modal */}
