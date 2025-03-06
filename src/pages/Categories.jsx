@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { FiFilter, FiX } from "react-icons/fi";
 
@@ -11,18 +11,6 @@ function Categories() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const BACKEND_URL = import.meta.env.VITE_API_URL;
-
-  useEffect(() => {
-    console.log(category);
-    if (category) {
-      setSelectedCategory(category.toLowerCase());
-    }
-    getProducts();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [selectedCategory, priceRange, sortBy, products, applyFilters]);
 
   const getProducts = async () => {
     try {
@@ -37,7 +25,7 @@ function Categories() {
     }
   };
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...products];
 
     // Filter by category
@@ -68,7 +56,20 @@ function Categories() {
     }
 
     setFilteredProducts(filtered);
-  };
+  }, [products, selectedCategory, priceRange, sortBy]);
+
+  useEffect(() => {
+    console.log(category);
+    if (category) {
+      setSelectedCategory(category.toLowerCase());
+    }
+    getProducts();
+  }, [category]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+
 
   return (
     <div className="container-custom py-8">
