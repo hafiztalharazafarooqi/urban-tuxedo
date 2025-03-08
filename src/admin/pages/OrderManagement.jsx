@@ -1,18 +1,86 @@
-import { useState } from 'react';
-import { format } from 'date-fns';
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
 
 function OrderManagement() {
-  const [orders] = useState([
-    {
-      id: '2024001',
-      customer: 'John Doe',
-      date: new Date(),
-      total: 599.99,
-      status: 'Processing',
-      payment: 'Paid',
-    },
-    // Add more dummy orders
-  ]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [paymentFilter, setPaymentFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+
+  // Simulate an API fetch using dummy data
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        // Dummy API response
+        const data = {
+          orders: [
+            {
+              id: "2024001",
+              customer: "John Doe",
+              date: new Date(),
+              total: 599.99,
+              status: "Processing",
+              payment: "Paid",
+            },
+            {
+              id: "2024002",
+              customer: "Jane Smith",
+              date: new Date(),
+              total: 299.99,
+              status: "Shipped",
+              payment: "Paid",
+            },
+            {
+              id: "2024003",
+              customer: "Bob Brown",
+              date: new Date(),
+              total: 899.99,
+              status: "Delivered",
+              payment: "Pending",
+            },
+          ],
+        };
+
+        // Simulate a delay (optional)
+        setTimeout(() => {
+          setOrders(data.orders);
+          setLoading(false);
+        }, 500);
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        setError("Failed to load orders. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  // Filter orders based on search and dropdown filters
+  const filteredOrders = orders.filter((order) => {
+    const matchesSearch =
+      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = statusFilter
+      ? order.status.toLowerCase() === statusFilter.toLowerCase()
+      : true;
+
+    const matchesPayment = paymentFilter
+      ? order.payment.toLowerCase() === paymentFilter.toLowerCase()
+      : true;
+
+    // If a date filter is set, compare formatted date strings (yyyy-MM-dd)
+    const matchesDate = dateFilter
+      ? format(order.date, "yyyy-MM-dd") === dateFilter
+      : true;
+
+    return matchesSearch && matchesStatus && matchesPayment && matchesDate;
+  });
 
   return (
     <div className="space-y-8">
@@ -24,93 +92,130 @@ function OrderManagement() {
           <input
             type="text"
             placeholder="Search orders..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="px-4 py-2 border rounded-md"
           />
-          <select className="px-4 py-2 border rounded-md">
+          <select
+            className="px-4 py-2 border rounded-md"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
             <option value="">All Status</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="Processing">Processing</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
           </select>
-          <select className="px-4 py-2 border rounded-md">
+          <select
+            className="px-4 py-2 border rounded-md"
+            value={paymentFilter}
+            onChange={(e) => setPaymentFilter(e.target.value)}
+          >
             <option value="">Payment Status</option>
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+            <option value="Failed">Failed</option>
           </select>
           <input
             type="date"
             className="px-4 py-2 border rounded-md"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
           />
         </div>
       </div>
 
-      {/* Orders Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order ID
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Payment
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {orders.map((order) => (
-                <tr key={order.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    #{order.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {order.customer}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {format(order.date, 'MMM dd, yyyy')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {order.total}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      {order.payment}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900">
-                      View Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Loading and Error States */}
+      {loading && (
+        <div className="flex justify-center p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading orders...</p>
+          </div>
         </div>
-      </div>
+      )}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Orders Table */}
+      {!loading && !error && (
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Order ID
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Payment
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredOrders.length > 0 ? (
+                  filteredOrders.map((order) => (
+                    <tr key={order.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        #{order.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {order.customer}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {format(order.date, "MMM dd, yyyy")}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        ${order.total.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          {order.payment}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button className="text-blue-600 hover:text-blue-900">
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                      No orders found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

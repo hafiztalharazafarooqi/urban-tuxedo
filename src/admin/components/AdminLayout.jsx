@@ -11,6 +11,8 @@ import {
   FiX,
   FiLogOut,
 } from 'react-icons/fi';
+import { BiCategory } from "react-icons/bi";
+
 
 function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -19,6 +21,7 @@ function AdminLayout() {
 
   const menuItems = [
     { path: '/admin', icon: FiHome, label: 'Dashboard' },
+    { path: '/admin/category', icon: BiCategory, label: 'Category' },
     { path: '/admin/products', icon: FiBox, label: 'Products' },
     { path: '/admin/orders', icon: FiShoppingBag, label: 'Orders' },
     { path: '/admin/customers', icon: FiUsers, label: 'Customers' },
