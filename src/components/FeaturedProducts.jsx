@@ -74,7 +74,7 @@ function FeaturedProducts() {
                 <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300">
                   <div className="relative overflow-hidden">
                     <img
-                      src={product.image.primary}
+                      src={product.images.primary}
                       alt={product.title}
                       className="w-full h-80 object-cover transform group-hover:scale-105 transition duration-500"
                     />
