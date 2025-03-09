@@ -65,13 +65,13 @@ function ProductDetail() {
           <div className="space-y-4">
             <div className="aspect-w-3 aspect-h-4">
               <img
-                src={selctedProduct?.image?.primary}
+                src={selctedProduct?.images?.primary}
                 alt="Product"
                 className="w-full h-full object-cover rounded-lg"
               />
             </div>
             <div className="grid grid-cols-4 gap-4">
-              {selctedProduct?.image?.gallery.map((img, index) => (
+              {selctedProduct?.images?.gallery.map((img, index) => (
                 <img
                   key={index}
                   src={img}
