@@ -10,18 +10,27 @@ function Categories() {
   const [sortBy, setSortBy] = useState("featured");
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [loading, setLoading] = useState(true);  
+  const [error, setError] = useState(null);
+
+
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
   const getProducts = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`${BACKEND_URL}/products`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
       const data = await response.json();
       setProducts(data.products);
+      setLoading(false);
     } catch (error) {
       console.warn(`Fetching products failed: ${error.message}`);
+      setError("No products found.");
+
+      setLoading(false);
     }
   };
 
@@ -59,7 +68,6 @@ function Categories() {
   }, [products, selectedCategory, priceRange, sortBy]);
 
   useEffect(() => {
-    console.log(category);
     if (category) {
       setSelectedCategory(category.toLowerCase());
     }
@@ -69,7 +77,6 @@ function Categories() {
   useEffect(() => {
     applyFilters();
   }, [applyFilters]);
-
 
   return (
     <div className="container-custom py-8">
@@ -157,9 +164,22 @@ function Categories() {
           </div>
 
           {/* Products */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((item) => (
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-gray-200 h-80 rounded-lg mb-4"></div>
+                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+                  <div className="h-10 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <p className="text-red-500 text-center w-full">{error}</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {filteredProducts.map((item) => (
                 <Link
                   key={item._id}
                   to={`/product/${item._id}`}
@@ -182,13 +202,9 @@ function Categories() {
                     </div>
                   </div>
                 </Link>
-              ))
-            ) : (
-              <p className="text-gray-500 text-center col-span-3">
-                {/* No products found matching your criteria. */}
-              </p>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
