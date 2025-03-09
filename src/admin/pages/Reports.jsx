@@ -58,7 +58,7 @@ const Reports = () => {
     { name: 'Accessories', value: 10 },
   ];
 
-  const COLORS = ['#D4AF37', '#1a1a1a', '#666666', '#999999'];
+  const COLORS = ['#dc2626', '#1a1a1a', '#666666', '#999999'];
   
   // Get current data based on selected date range
   const currentData = salesData[dateRange];
@@ -103,7 +103,7 @@ const Reports = () => {
           <select
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            className="px-4 py-2 border rounded-md bg-white"
+            className="px-6 py-2 border bg-white rounded-full"
           >
             <option value="week">Last Week</option>
             <option value="month">Last Month</option>
@@ -111,7 +111,7 @@ const Reports = () => {
           </select>
           <button 
             onClick={handleExport}
-            className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors"
+            className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
             Export Report
           </button>
@@ -132,7 +132,7 @@ const Reports = () => {
                 <Line
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#D4AF37"
+                  stroke="#dc2626"
                   strokeWidth={2}
                   activeDot={{ r: 8 }}
                 />

@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
-import { FiPlus, FiUpload, FiX } from 'react-icons/fi';
-import PropTypes from 'prop-types';
+import { useRef, useState } from "react";
+import { FiPlus, FiUpload, FiX } from "react-icons/fi";
+import PropTypes from "prop-types";
 
 // Mock function to simulate image upload
 const uploadImage = async (file) => {
@@ -14,131 +14,134 @@ const uploadImage = async (file) => {
 
 const AddProductForm = ({ onAddProduct }) => {
   const [productData, setProductData] = useState({
-    title: '',
-    price: '',
-    description: '',
-    categories: '',
+    title: "",
+    price: "",
+    description: "",
+    categories: "",
     images: {
       primary: null,
-      gallery: []
+      gallery: [],
     },
     availableSizes: [],
-    defaultQuantity: 1
+    defaultQuantity: 1,
   });
-  
-  const [sizeInput, setSizeInput] = useState('');
+
+  const [sizeInput, setSizeInput] = useState("");
   const [primaryImagePreview, setPrimaryImagePreview] = useState(null);
   const [galleryPreviews, setGalleryPreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const primaryFileInputRef = useRef(null);
   const galleryFileInputRef = useRef(null);
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProductData({
       ...productData,
-      [name]: value
+      [name]: value,
     });
   };
-  
+
   const handleAddSize = () => {
     if (sizeInput.trim()) {
       setProductData({
         ...productData,
-        availableSizes: [...productData.availableSizes, sizeInput.trim()]
+        availableSizes: [...productData.availableSizes, sizeInput.trim()],
       });
-      setSizeInput('');
+      setSizeInput("");
     }
   };
-  
+
   const handleRemoveSize = (index) => {
     const updatedSizes = [...productData.availableSizes];
     updatedSizes.splice(index, 1);
     setProductData({
       ...productData,
-      availableSizes: updatedSizes
+      availableSizes: updatedSizes,
     });
   };
-  
+
   const handlePrimaryImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     // Create a preview
     const reader = new FileReader();
     reader.onload = () => {
       setPrimaryImagePreview(reader.result);
     };
     reader.readAsDataURL(file);
-    
+
     // Store the file in state
     setProductData({
       ...productData,
       images: {
         ...productData.images,
-        primary: file
-      }
+        primary: file,
+      },
     });
   };
-  
+
   const handleGalleryImagesChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
-    
+
     // Create previews
     const newPreviews = [];
-    files.forEach(file => {
+    files.forEach((file) => {
       const reader = new FileReader();
       reader.onload = () => {
         newPreviews.push(reader.result);
         if (newPreviews.length === files.length) {
-          setGalleryPreviews(prevPreviews => [...prevPreviews, ...newPreviews]);
+          setGalleryPreviews((prevPreviews) => [
+            ...prevPreviews,
+            ...newPreviews,
+          ]);
         }
       };
       reader.readAsDataURL(file);
     });
-    
+
     // Store the files in state
     setProductData({
       ...productData,
       images: {
         ...productData.images,
-        gallery: [...productData.images.gallery, ...files]
-      }
+        gallery: [...productData.images.gallery, ...files],
+      },
     });
   };
-  
+
   const removeGalleryImage = (index) => {
     const updatedGallery = [...productData.images.gallery];
     updatedGallery.splice(index, 1);
-    
+
     const updatedPreviews = [...galleryPreviews];
     updatedPreviews.splice(index, 1);
-    
+
     setProductData({
       ...productData,
       images: {
         ...productData.images,
-        gallery: updatedGallery
-      }
+        gallery: updatedGallery,
+      },
     });
     setGalleryPreviews(updatedPreviews);
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       // Upload primary image
       const primaryImageUrl = await uploadImage(productData.images.primary);
-      
+
       // Upload gallery images
       const galleryImageUrls = await Promise.all(
-        productData.images.gallery.map(file => uploadImage(file))
+        productData.images.gallery.map((file) => uploadImage(file))
       );
-      
+
       // Format data for API
       const formattedData = {
         ...productData,
@@ -148,47 +151,50 @@ const AddProductForm = ({ onAddProduct }) => {
         __v: 0,
         images: {
           primary: primaryImageUrl,
-          gallery: galleryImageUrls
-        }
-      };
-      
-      // Send data to API
-      const response = await fetch('https://urban-tuxedo-backend.vercel.app/api/products/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+          gallery: galleryImageUrls,
         },
-        body: JSON.stringify(formattedData)
-      });
-      
+      };
+
+      // Send data to API
+      const response = await fetch(
+        "https://urban-tuxedo-backend.vercel.app/api/products/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formattedData),
+        }
+      );
+
       if (!response.ok) {
-        throw new Error('Failed to add product');
+        throw new Error("Failed to add product");
       }
-      
+
       const data = await response.json();
       onAddProduct(data); // Notify parent component
-      alert('Product added successfully!');
+      alert("Product added successfully!");
     } catch (error) {
-      console.error('Error adding product:', error);
-      alert('Failed to add product. Please try again.');
+      console.error("Error adding product:", error);
+      alert("Failed to add product. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 max-w-4xl w-full max-h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-serif">Add New Product</h2>
-          <button 
+          <button
             onClick={() => onAddProduct(false)}
             className="text-gray-500 hover:text-gray-700"
           >
             <FiX size={24} />
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left column */}
@@ -206,7 +212,7 @@ const AddProductForm = ({ onAddProduct }) => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Price* ($)
@@ -222,7 +228,7 @@ const AddProductForm = ({ onAddProduct }) => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Categories (separated by &apos;/&apos;)
@@ -236,7 +242,7 @@ const AddProductForm = ({ onAddProduct }) => {
                   className="w-full px-4 py-2 border rounded-md"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Default Quantity
@@ -250,7 +256,7 @@ const AddProductForm = ({ onAddProduct }) => {
                   className="w-full px-4 py-2 border rounded-md"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description*
@@ -265,7 +271,7 @@ const AddProductForm = ({ onAddProduct }) => {
                 ></textarea>
               </div>
             </div>
-            
+
             {/* Right column */}
             <div className="space-y-4">
               <div>
@@ -288,13 +294,16 @@ const AddProductForm = ({ onAddProduct }) => {
                     <FiPlus size={20} />
                   </button>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2">
                   {productData.availableSizes.map((size, index) => (
-                    <div key={index} className="bg-gray-200 rounded-full px-3 py-1 flex items-center gap-1">
+                    <div
+                      key={index}
+                      className="bg-gray-200 rounded-full px-3 py-1 flex items-center gap-1"
+                    >
                       <span>{size}</span>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => handleRemoveSize(index)}
                         className="text-gray-500 hover:text-gray-700"
                       >
@@ -304,7 +313,7 @@ const AddProductForm = ({ onAddProduct }) => {
                   ))}
                 </div>
               </div>
-              
+
               {/* Primary Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -325,12 +334,14 @@ const AddProductForm = ({ onAddProduct }) => {
                   >
                     {primaryImagePreview ? (
                       <div className="w-full">
-                        <img 
-                          src={primaryImagePreview} 
-                          alt="Primary preview" 
+                        <img
+                          src={primaryImagePreview}
+                          alt="Primary preview"
                           className="h-40 mx-auto object-contain rounded-md"
                         />
-                        <p className="mt-2 text-center text-xs">Click to change image</p>
+                        <p className="mt-2 text-center text-xs">
+                          Click to change image
+                        </p>
                       </div>
                     ) : (
                       <div className="text-center">
@@ -341,7 +352,7 @@ const AddProductForm = ({ onAddProduct }) => {
                   </button>
                 </div>
               </div>
-              
+
               {/* Gallery Images Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -367,15 +378,15 @@ const AddProductForm = ({ onAddProduct }) => {
                     </div>
                   </button>
                 </div>
-                
+
                 {/* Gallery previews */}
                 {galleryPreviews.length > 0 && (
                   <div className="mt-4 grid grid-cols-3 gap-2">
                     {galleryPreviews.map((preview, index) => (
                       <div key={index} className="relative group">
-                        <img 
-                          src={preview} 
-                          alt={`Gallery ${index}`} 
+                        <img
+                          src={preview}
+                          alt={`Gallery ${index}`}
                           className="h-24 w-full object-cover rounded-md"
                         />
                         <button
@@ -392,14 +403,14 @@ const AddProductForm = ({ onAddProduct }) => {
               </div>
             </div>
           </div>
-          
+
           <div className="flex justify-end gap-4 mt-6">
-            <button 
-              type="submit" 
-              className="px-6 py-2 bg-amber-600 text-white rounded-md font-medium hover:bg-amber-700"
+            <button
+              type="submit"
+              className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Adding...' : 'Add Product'}
+              {isSubmitting ? "Adding..." : "Add Product"}
             </button>
           </div>
         </form>

@@ -182,7 +182,7 @@ const AddCategoryForm = ({ onAddCategory }) => {
           <div className="flex justify-end gap-4 mt-6">
             <button
               type="submit"
-              className="px-6 py-2 bg-amber-600 text-white rounded-md font-medium hover:bg-amber-700"
+              className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Adding..." : "Add Category"}

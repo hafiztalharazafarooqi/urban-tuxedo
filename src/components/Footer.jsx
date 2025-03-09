@@ -13,13 +13,13 @@ function Footer() {
               Bringing you the finest formal wear since 2020
             </p>
             <div className="flex justify-center md:justify-start space-x-4">
-              <a href="https://instagram.com" className="hover:text-gold transition-colors" aria-label="Instagram">
+              <a href="https://instagram.com" className="hover:text-red-600 transition-colors" aria-label="Instagram">
                 <FiInstagram size={20} />
               </a>
-              <a href="https://facebook.com" className="hover:text-gold transition-colors" aria-label="Facebook">
+              <a href="https://facebook.com" className="hover:text-red-600 transition-colors" aria-label="Facebook">
                 <FiFacebook size={20} />
               </a>
-              <a href="https://twitter.com" className="hover:text-gold transition-colors" aria-label="Twitter">
+              <a href="https://twitter.com" className="hover:text-red-600 transition-colors" aria-label="Twitter">
                 <FiTwitter size={20} />
               </a>
             </div>
@@ -29,10 +29,10 @@ function Footer() {
           <div className="text-center">
             <h3 className="text-xl font-serif mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link to="/" className="text-gray-300 hover:text-gold transition-colors">Home</Link></li>
-              <li><Link to="/category" className="text-gray-300 hover:text-gold transition-colors">Shop</Link></li>
-              <li><Link to="/cart" className="text-gray-300 hover:text-gold transition-colors">Cart</Link></li>
-              <li><Link to="/profile" className="text-gray-300 hover:text-gold transition-colors">Account</Link></li>
+              <li><Link to="/" className="text-gray-300 hover:text-red-600 transition-colors">Home</Link></li>
+              <li><Link to="/category" className="text-gray-300 hover:text-red-600 transition-colors">Shop</Link></li>
+              <li><Link to="/cart" className="text-gray-300 hover:text-red-600 transition-colors">Cart</Link></li>
+              <li><Link to="/profile" className="text-gray-300 hover:text-red-600 transition-colors">Account</Link></li>
             </ul>
           </div>
 
@@ -46,11 +46,11 @@ function Footer() {
               </li>
               <li className="flex items-center justify-center md:justify-end">
                 <FiPhone className="mr-2" />
-                <a href="tel:+441234567890" className="text-gray-300 hover:text-gold transition-colors">+44 123 456 7890</a>
+                <a href="tel:+441234567890" className="text-gray-300 hover:text-red-600 transition-colors">+44 123 456 7890</a>
               </li>
               <li className="flex items-center justify-center md:justify-end">
                 <FiMail className="mr-2" />
-                <a href="mailto:info@urbantuxedo.com" className="text-gray-300 hover:text-gold transition-colors">info@urbantuxedo.com</a>
+                <a href="mailto:info@urbantuxedo.com" className="text-gray-300 hover:text-red-600 transition-colors">info@urbantuxedo.com</a>
               </li>
             </ul>
           </div>

@@ -90,19 +90,6 @@ function Login() {
               </div>
             </div>
           </div>
-
-          {/* Social Proof */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-500 mb-4">
-              Trusted by discerning customers worldwide
-            </p>
-            <div className="flex justify-center space-x-8">
-              <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-              <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-              <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-              <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

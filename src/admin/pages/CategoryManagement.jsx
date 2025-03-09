@@ -114,7 +114,7 @@ function CategoryManagement() {
         <h1 className="text-3xl font-serif">Category Management</h1>
         <div className="flex gap-4">
           <button
-            className="btn btn-gold flex items-center gap-2"
+            className="flex items-center gap-2 px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             onClick={() => setShowAddModal(true)}
           >
             <FiPlus /> Add New Category

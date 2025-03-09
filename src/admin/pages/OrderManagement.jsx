@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
 
 function OrderManagement() {
   const [orders, setOrders] = useState([]);
@@ -198,15 +199,20 @@ function OrderManagement() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-blue-600 hover:text-blue-900">
-                          View Details
-                        </button>
+                        <Link to={`/admin/order/${order.id}`} className="group">
+                          <button className="text-blue-600 hover:text-blue-900">
+                            View Details
+                          </button>{" "}
+                        </Link>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                    <td
+                      colSpan="7"
+                      className="px-6 py-4 text-center text-gray-500"
+                    >
                       No orders found
                     </td>
                   </tr>

@@ -82,7 +82,7 @@ function Login() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-gold focus:border-gold"
+                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-red-600 focus:border-red-600"
               />
             </div>
             <div>
@@ -99,7 +99,7 @@ function Login() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-gold focus:border-gold"
+                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-red-600 focus:border-red-600"
               />
             </div>
           </div>
@@ -112,7 +112,7 @@ function Login() {
                 type="checkbox"
                 checked={formData.remember}
                 onChange={handleChange}
-                className="h-4 w-4 text-gold focus:ring-gold border-gray-300 rounded"
+                className="h-4 w-4 text-red-600 focus:ring-red-600 border-gray-300 rounded"
               />
               <label
                 htmlFor="remember-me"
@@ -123,19 +123,25 @@ function Login() {
             </div>
 
             <div className="text-sm">
-              <a href="#" className="text-gold hover:text-gold-light">
+              <Link to="/forget-password" className="text-red-600 hover:text-red-600-light">
                 Forgot your password?
-              </a>
+              </Link>
             </div>
           </div>
 
-          <button type="submit" className="btn btn-gold w-full">
+          <button
+            type="submit"
+            className="w-full px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          >
             Sign in
           </button>
 
           <p className="text-center text-sm">
             Don&apos;t have an account?{" "}
-            <Link to="/register" className="text-gold hover:text-gold-light">
+            <Link
+              to="/register"
+              className="text-red-600 hover:text-red-600-light"
+            >
               Sign up
             </Link>
           </p>

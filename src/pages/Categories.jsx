@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { FiFilter, FiX } from "react-icons/fi";
 
 function Categories() {
-  const { category } = useParams(); // category will be "formal-wear" in this case
+  const { category } = useParams(); 
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceRange, setPriceRange] = useState("all");

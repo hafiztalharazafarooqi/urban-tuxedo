@@ -69,7 +69,7 @@ function AdminLayout() {
                   to={item.path}
                   className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
                     location.pathname === item.path
-                      ? 'bg-gold text-white'
+                      ? 'bg-red-600 text-white'
                       : 'hover:bg-gray-100'
                   }`}
                 >

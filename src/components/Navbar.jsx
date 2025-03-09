@@ -121,7 +121,7 @@ function Navbar() {
             >
               Cart{" "}
               {cartCount > 0 && (
-                <span className="ml-2 bg-gold text-white text-xs rounded-full px-2 py-1">
+                <span className="ml-2 bg-red-600 text-white text-xs rounded-full px-2 py-1">
                   {cartCount}
                 </span>
               )}

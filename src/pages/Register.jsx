@@ -107,7 +107,7 @@ function Register() {
                   required
                   value={formData.firstName}
                   onChange={handleChange}
-                  className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-gold focus:border-gold"
+                  className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-red-600 focus:border-red-600"
                 />
               </div>
               <div>
@@ -124,7 +124,7 @@ function Register() {
                   required
                   value={formData.lastName}
                   onChange={handleChange}
-                  className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-gold focus:border-gold"
+                  className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-red-600 focus:border-red-600"
                 />
               </div>
             </div>
@@ -142,7 +142,7 @@ function Register() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-gold focus:border-gold"
+                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-red-600 focus:border-red-600"
               />
             </div>
             <div>
@@ -159,7 +159,7 @@ function Register() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-gold focus:border-gold"
+                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-red-600 focus:border-red-600"
               />
             </div>
             <div>
@@ -176,7 +176,7 @@ function Register() {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-gold focus:border-gold"
+                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-red-600600 focus:border-red-600"
               />
             </div>
           </div>
@@ -189,23 +189,26 @@ function Register() {
               required
               checked={formData.terms}
               onChange={handleChange}
-              className="h-4 w-4 text-gold focus:ring-gold border-gray-300 rounded"
+              className="h-4 w-4 text-red-600 focus:ring-red-600 border-gray-300 rounded"
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
               I agree to the{" "}
-              <a href="#" className="text-gold hover:text-gold-light">
+              <a href="#" className="text-red-600 hover:text-red-600-light">
                 Terms and Conditions
               </a>
             </label>
           </div>
 
-          <button type="submit" className="btn btn-gold w-full">
+          <button
+            type="submit"
+            className="w-full px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          >
             Create Account
           </button>
 
           <p className="text-center text-sm">
             Already have an account?{" "}
-            <Link to="/login" className="text-gold hover:text-gold-light">
+            <Link to="/login" className="text-red-600 hover:text-red-600-light">
               Sign in
             </Link>
           </p>

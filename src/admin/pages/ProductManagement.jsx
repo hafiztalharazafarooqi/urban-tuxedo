@@ -48,8 +48,10 @@ function ProductManagement() {
               ? "In Stock"
               : "Out of Stock",
           images: {
-            primary : product.images?.primary || `https://source.unsplash.com/random/100x100/?tuxedo&sig=${product._id}`,
-            gallery : product.images?.gallery || []
+            primary:
+              product.images?.primary ||
+              `https://source.unsplash.com/random/100x100/?tuxedo&sig=${product._id}`,
+            gallery: product.images?.gallery || [],
           },
           sizes: product.availableSizes || [],
           description: product.description,
@@ -57,7 +59,6 @@ function ProductManagement() {
       });
 
       setProducts(formattedProducts);
-
     } catch (err) {
       console.error("Error fetching products:", err);
       setError("Failed to load products. Please try again later.");
@@ -116,7 +117,7 @@ function ProductManagement() {
         <h1 className="text-3xl font-serif">Product Management</h1>
         <div className="flex gap-4">
           <button
-            className="btn btn-gold flex items-center gap-2"
+            className="flex items-center gap-2 px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             onClick={() => setShowAddModal(true)}
           >
             <FiPlus /> Add New Product
@@ -312,8 +313,9 @@ function ProductManagement() {
       )}
 
       {/* Add Product Modal */}
-      {showAddModal && <AddProductForm onAddProduct={() => handleAddProduct(event)} />}
-
+      {showAddModal && (
+        <AddProductForm onAddProduct={() => handleAddProduct(event)} />
+      )}
     </div>
   );
 }

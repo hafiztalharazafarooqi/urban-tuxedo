@@ -189,7 +189,10 @@ function Checkout() {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-gold w-full py-3">
+            <button
+              type="submit"
+              className="w-full px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
               Place Order
             </button>
           </form>
@@ -229,7 +232,7 @@ function Checkout() {
             <p className="mb-6">Your order ID is {orderId}</p>
             <button
               onClick={handleClosePopup}
-              className="btn btn-gold px-6 py-2"
+              className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               Close
             </button>

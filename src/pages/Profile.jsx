@@ -1,6 +1,5 @@
 import {
   ChevronRight,
-  Heart,
   LogOut,
   Package,
   Settings,
@@ -54,7 +53,7 @@ function Profile() {
         {/* User Card - Positioned over the hero image */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-6 hover:shadow-md transform hover:-translate-y-1">
+            <div className="flex items-center gap-6 transform">
               <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center shadow-md">
                 <span className="text-3xl font-bold text-red-500">JD</span>
               </div>
@@ -108,23 +107,6 @@ function Profile() {
                     <span className="font-medium">Orders</span>
                   </div>
                   {activeTab === "orders" && (
-                    <ChevronRight className="h-5 w-5" />
-                  )}
-                </button>
-
-                <button
-                  className={`w-full flex items-center justify-between px-6 py-4 rounded-xl transition transform ${
-                    activeTab === "wishlist"
-                      ? "bg-red-500 text-white shadow-md"
-                      : "text-gray-700 hover:bg-gray-100 hover:-translate-y-1"
-                  }`}
-                  onClick={() => setActiveTab("wishlist")}
-                >
-                  <div className="flex items-center gap-3">
-                    <Heart className="h-5 w-5" />
-                    <span className="font-medium">Wishlist</span>
-                  </div>
-                  {activeTab === "wishlist" && (
                     <ChevronRight className="h-5 w-5" />
                   )}
                 </button>

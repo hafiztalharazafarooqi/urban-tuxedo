@@ -119,7 +119,7 @@ function ProductDetail() {
               <h1 className="text-3xl font-serif mb-4">
                 {selctedProduct?.title}
               </h1>
-              <p className="text-2xl text-gold mb-6">
+              <p className="text-2xl text-red-600 mb-6">
                 £{selctedProduct?.price}
               </p>
 
@@ -138,8 +138,8 @@ function ProductDetail() {
                         key={size}
                         className={`px-4 py-2 border rounded-md ${
                           selectedSize === size
-                            ? "border-gold bg-gold text-white"
-                            : "border-gray-300 hover:border-gold"
+                            ? "border-red-600 bg-red-600 text-white"
+                            : "border-gray-300 hover:border-red-600"
                         }`}
                         onClick={() => setSelectedSize(size)}
                       >
@@ -172,7 +172,7 @@ function ProductDetail() {
                 {/* Add to Cart */}
                 <div className="space-y-4">
                   <button
-                    className="btn btn-gold w-full py-3"
+                    className="w-full py-3 px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                     onClick={handleAddToCart}
                   >
                     Add to Cart

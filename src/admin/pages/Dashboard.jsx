@@ -80,8 +80,8 @@ function Dashboard() {
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="#D4AF37"
-                  fill="#D4AF37"
+                  stroke="#dc2626"
+                  fill="#dc2626"
                   fillOpacity={0.2}
                 />
               </AreaChart>
@@ -99,7 +99,7 @@ function Dashboard() {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="value" fill="#D4AF37" />
+                <Bar dataKey="value" fill="#dc2626" />
               </BarChart>
             </ResponsiveContainer>
           </div>
