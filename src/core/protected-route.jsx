@@ -1,15 +1,14 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 function ProtectedRoute({ children }) {
-  // Check if the user is logged in. For example, we can check if a token exists.
-  const igLogin = localStorage.getItem('isLogin');
+  const location = useLocation();
+  const igLogin = JSON.parse(localStorage.getItem('isLogin'));
 
-  if (!igLogin) {
-    // User is not authenticated, so redirect to login
-    return <Navigate to="/login" replace />;
+  // Check if the user is logged in and has the role of admin when accessing admin routes
+  if (location.pathname.startsWith('/admin') && (!igLogin || igLogin.user?.role !== 'admin')) {
+    return <Navigate to="/" replace />;
   }
 
-  // Otherwise, render the protected component
   return children;
 }
 

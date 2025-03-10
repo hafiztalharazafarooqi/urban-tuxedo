@@ -42,9 +42,10 @@ function Login() {
         const data = await response.json();
         toast.success("Login successful!");
         localStorage.setItem("isLogin", JSON.stringify(data));
-
         setTimeout(() => {
-          const redirectUrl = localStorage.getItem("redirectAfterLogin") || "/";
+          const defaultPage = data.user.role === 'user' ? '/' : '/admin';
+          console.log("Redirecting to home page", data);
+          const redirectUrl = localStorage.getItem("redirectAfterLogin") || defaultPage;
           console.log(redirectUrl);
 
           localStorage.removeItem("redirectAfterLogin"); // Clear after use

@@ -48,8 +48,22 @@ function App() {
       <Routes>
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route
+            index
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route path="category" element={<CategoryManagement />} />
           <Route path="products" element={<ProductManagement />} />
           <Route path="orders" element={<OrderManagement />} />
@@ -65,8 +79,22 @@ function App() {
           <Route path="category" element={<Categories />} />
           <Route path="category/:category" element={<Categories />} />
           <Route path="product/:id" element={<ProductDetail />} />
-          <Route path="cart" element={ <ProtectedRoute><Cart /></ProtectedRoute>} />
-          <Route path="checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+          <Route
+            path="cart"
+            element={
+              <ProtectedRoute>
+                <Cart />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="checkout"
+            element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            }
+          />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="forget-password" element={<ForgetPassword />} />

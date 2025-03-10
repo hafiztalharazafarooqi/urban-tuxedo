@@ -1,23 +1,22 @@
 import { useState } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { BiCategory } from "react-icons/bi";
 import {
-  FiHome,
+  FiBarChart2,
   FiBox,
+  FiHome,
+  FiLogOut,
+  FiMenu,
+  FiSettings,
   FiShoppingBag,
   FiUsers,
-  FiBarChart2,
-  FiSettings,
-  FiMenu,
   FiX,
-  FiLogOut,
 } from 'react-icons/fi';
-import { BiCategory } from "react-icons/bi";
+import { Link, Outlet, useLocation } from 'react-router-dom';
 
 
 function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
   const menuItems = [
     { path: '/admin', icon: FiHome, label: 'Dashboard' },
@@ -28,10 +27,17 @@ function AdminLayout() {
     { path: '/admin/reports', icon: FiBarChart2, label: 'Reports' },
     { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
   ];
+  
+  const handleLogout = async (e) => {
+    e.preventDefault();
 
-  const handleLogout = () => {
-    // Handle logout logic here
-    navigate('/admin/login');
+    try {
+      localStorage.removeItem("isLogin");
+      window.dispatchEvent(new Event("storage")); // Notify other components
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout failed: ", error.message);
+    }
   };
 
   return (
