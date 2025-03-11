@@ -3,16 +3,16 @@ import { Link, useParams } from "react-router-dom";
 import { FiFilter, FiX } from "react-icons/fi";
 
 function Categories() {
-  const { category } = useParams(); 
+  const { category } = useParams();
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [loading, setLoading] = useState(true);  
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [categoryList, setCategoryList] = useState([]);
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
@@ -34,13 +34,37 @@ function Categories() {
     }
   };
 
+  const getCategories = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/category`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await response.json();
+      const formattedCategory = [
+        { id: 1, name: "All", slug: "all" }, // Ensure this is the first item
+        ...data.category.map((category) => ({
+          id: category._id, // _id is already a string in actual API response
+          name: category.name,
+          slug: category.slug,
+        })),
+      ];
+      console.log(formattedCategory);
+
+      setCategoryList(formattedCategory);
+    } catch (error) {
+      console.warn(`Failed to fetch categories: ${error.message}`);
+      setError("Failed to load categories. Please try again later.");
+    }
+  };
+
   const applyFilters = useCallback(() => {
     let filtered = [...products];
-
+    
     // Filter by category
     if (selectedCategory !== "all") {
       filtered = filtered.filter((item) =>
-        item.categories.toLowerCase()?.includes(selectedCategory?.toLowerCase())
+        item?.category?.includes(selectedCategory)
       );
     }
 
@@ -72,6 +96,7 @@ function Categories() {
       setSelectedCategory(category.toLowerCase());
     }
     getProducts();
+    getCategories();
   }, [category]);
 
   useEffect(() => {
@@ -103,21 +128,19 @@ function Categories() {
           <div>
             <h3 className="font-serif text-lg mb-3">Categories</h3>
             <div className="space-y-2">
-              {["All", "Formal Wear", "Casual Wear", "Accessories"].map(
-                (category) => (
-                  <label key={category} className="flex items-center">
-                    <input
-                      type="radio"
-                      name="category"
-                      value={category.toLowerCase()}
-                      checked={selectedCategory === category.toLowerCase()}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="mr-2"
-                    />
-                    {category}
-                  </label>
-                )
-              )}
+              {categoryList.map((category) => (
+                <label key={category.id} className="flex items-center">
+                  <input
+                    type="radio"
+                    name="category"
+                    value={category.slug}
+                    checked={selectedCategory === category.slug}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="mr-2"
+                  />
+                  {category.name}
+                </label>
+              ))}
             </div>
           </div>
 

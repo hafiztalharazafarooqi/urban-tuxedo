@@ -11,6 +11,7 @@ function Login() {
     remember: false,
   });
   const [message, setMessage] = useState("");
+  const [loader, setLoader] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,8 +24,9 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoader(true);
     const BACKEND_URL = import.meta.env.VITE_API_URL;
-
+    
     try {
       const response = await fetch(`${BACKEND_URL}/auth/login`, {
         method: "POST",
@@ -41,18 +43,21 @@ function Login() {
       } else {
         const data = await response.json();
         toast.success("Login successful!");
-        // data.user.role = 'admin';
+        data.user.role = 'admin';
         localStorage.setItem("isLogin", JSON.stringify(data));
         setTimeout(() => {
           const defaultPage = data.user.role === 'user' ? '/' : '/admin';
           const redirectUrl = localStorage.getItem("redirectAfterLogin") || defaultPage;
-
+          
           localStorage.removeItem("redirectAfterLogin"); // Clear after use
+          window.dispatchEvent(new Event("storage")); // Notify other components
           navigate(redirectUrl);
+          setLoader(false);
           // navigate('/');
         }, 2000);
       }
     } catch (error) {
+      setLoader(false);
       setMessage(`Login failed: ${error.message}`);
     }
   };
@@ -133,7 +138,7 @@ function Login() {
             type="submit"
             className="w-full px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
-            Sign in
+            {loader ? 'Signing in...' : 'Sign in'}
           </button>
 
           <p className="text-center text-sm">

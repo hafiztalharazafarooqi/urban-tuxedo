@@ -14,12 +14,12 @@ function FeaturedCategories() {
 
   const getCategories = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/categories`, {
+      const response = await fetch(`${BACKEND_URL}/category`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
       const data = await response.json();
-      setCategories(data.categories);
+      setCategories(data.category);
     } catch (error) {
       console.warn(`Failed to fetch categories: ${error.message}`);
       setError("Failed to load categories. Please try again later.");
@@ -43,8 +43,8 @@ function FeaturedCategories() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((category) => (
               <Link
-                key={category.id}
-                to={category.path}
+                key={category._id}
+                to={`category/${category.slug}`}
                 className="relative group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition duration-300"
               >
                 <div className="aspect-[3/4] overflow-hidden">
@@ -60,7 +60,7 @@ function FeaturedCategories() {
                     {category.name}
                   </h3>
                   <span className="inline-flex items-center text-sm font-medium text-white border-b border-white/50 pb-1 group-hover:border-white transition-all">
-                    Explore Collection{" "}
+                    Explore Collection
                     <ChevronRight className="h-4 w-4 ml-1 group-hover:ml-2 transition-all" />
                   </span>
                 </div>

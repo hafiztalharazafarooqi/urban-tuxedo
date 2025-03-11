@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FiPlus, FiUpload, FiX } from "react-icons/fi";
 import PropTypes from "prop-types";
 
@@ -30,6 +30,10 @@ const AddProductForm = ({ onAddProduct }) => {
   const [primaryImagePreview, setPrimaryImagePreview] = useState(null);
   const [galleryPreviews, setGalleryPreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [categoryList, setCategoryList] = useState([]);
+
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
 
   const primaryFileInputRef = useRef(null);
   const galleryFileInputRef = useRef(null);
@@ -156,16 +160,13 @@ const AddProductForm = ({ onAddProduct }) => {
       };
 
       // Send data to API
-      const response = await fetch(
-        "https://urban-tuxedo-backend.vercel.app/api/products/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formattedData),
-        }
-      );
+      const response = await fetch(`${BACKEND_URL}/products/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formattedData),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to add product");
@@ -179,6 +180,30 @@ const AddProductForm = ({ onAddProduct }) => {
       alert("Failed to add product. Please try again.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  useEffect(() => {
+    getCategories();
+  }, []);
+
+  const getCategories = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/category`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await response.json();
+      const formattedCategory = data.category.map((category) => ({
+        id: category._id, // _id is already a string in actual API response
+        name: category.name,
+        slug: category.slug,
+      }));
+      console.log(formattedCategory);
+
+      setCategoryList(formattedCategory);
+    } catch (error) {
+      console.warn(`Failed to fetch categories: ${error.message}`);
+      setError("Failed to load categories. Please try again later.");
     }
   };
 
@@ -215,7 +240,7 @@ const AddProductForm = ({ onAddProduct }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price* ($)
+                  Price*
                 </label>
                 <input
                   type="number"
@@ -231,16 +256,29 @@ const AddProductForm = ({ onAddProduct }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Categories (separated by &apos;/&apos;)
+                  Categories*
                 </label>
-                <input
+                <select
+                  className="w-full px-4 py-2 border rounded-md"
+                  value={productData.categories}
+                  onChange={handleChange}
+                  required
+                >
+                  {categoryList.map((category) => (
+                    <option key={category.id} value={category.slug}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+
+                {/* <input
                   type="text"
                   name="categories"
                   value={productData.categories}
                   onChange={handleChange}
                   placeholder="e.g. Accessories/Formal Wear"
                   className="w-full px-4 py-2 border rounded-md"
-                />
+                /> */}
               </div>
 
               <div>

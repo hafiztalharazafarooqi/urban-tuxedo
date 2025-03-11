@@ -5,9 +5,11 @@ import { FiMenu, FiX, FiShoppingCart, FiUser, FiLogIn } from "react-icons/fi";
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [initial, setInitial] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(
     !!localStorage.getItem("isLogin")
   );
+  
 
   // Function to update the cart count from localStorage
   const updateCartCount = () => {
@@ -39,6 +41,13 @@ function Navbar() {
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("isLogin"));
+    if (user) {
+      setInitial(user.user.username.charAt(0).toUpperCase());
+    }
+  }, [isLoggedIn]);
 
   return (
     <nav className="bg-white shadow-md">
@@ -76,10 +85,10 @@ function Navbar() {
               className="hover:text-red-500 transition-colors"
             >
               {isLoggedIn ? (
-                // <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center shadow-md">
-                //   <span className="text-3xl font-bold text-red-500">JD</span>
-                // </div>
-                <FiUser size={20} />
+                <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center shadow-md">
+                  <span className="text-3xl font-bold text-red-500">{initial}</span>
+                </div>
+                // <FiUser size={20} />
               ) : (
                 <FiLogIn size={20} />
               )}

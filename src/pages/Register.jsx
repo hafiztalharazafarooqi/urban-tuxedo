@@ -67,6 +67,7 @@ function Register() {
         );
       } else {
         const data = await response.json();
+        window.dispatchEvent(new Event("storage")); // Notify other components
         setMessage("Registration successful!");
         console.log("Registration success:", data);
         toast.success("Login successful!");
