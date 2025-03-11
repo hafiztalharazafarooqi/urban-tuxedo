@@ -41,12 +41,11 @@ function Login() {
       } else {
         const data = await response.json();
         toast.success("Login successful!");
+        // data.user.role = 'admin';
         localStorage.setItem("isLogin", JSON.stringify(data));
         setTimeout(() => {
           const defaultPage = data.user.role === 'user' ? '/' : '/admin';
-          console.log("Redirecting to home page", data);
           const redirectUrl = localStorage.getItem("redirectAfterLogin") || defaultPage;
-          console.log(redirectUrl);
 
           localStorage.removeItem("redirectAfterLogin"); // Clear after use
           navigate(redirectUrl);

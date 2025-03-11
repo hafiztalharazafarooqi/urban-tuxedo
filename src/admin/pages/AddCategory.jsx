@@ -2,12 +2,10 @@ import PropTypes from "prop-types";
 import { useRef, useState } from "react";
 import { FiUpload, FiX } from "react-icons/fi";
 
-// Mock function to simulate image upload
 const uploadImage = async (file) => {
-  // Replace this with your actual image upload logic
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(`https://example.com/${file.name}`);
+      resolve(`https://example.com/${file?.name}`);
     }, 1000);
   });
 };
@@ -15,13 +13,15 @@ const uploadImage = async (file) => {
 const AddCategoryForm = ({ onAddCategory }) => {
   const [categoryData, setCategoryData] = useState({
     name: "",
+    slug: "",
     description: "",
     image: null,
+    isActive: true,
+    parentCategory: null,
   });
 
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const imageFileInputRef = useRef(null);
 
   const handleChange = (e) => {
@@ -29,6 +29,7 @@ const AddCategoryForm = ({ onAddCategory }) => {
     setCategoryData({
       ...categoryData,
       [name]: value,
+      slug: name === "name" ? generateSlug(value) : categoryData.slug,
     });
   };
 
@@ -36,18 +37,20 @@ const AddCategoryForm = ({ onAddCategory }) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Create a preview
     const reader = new FileReader();
     reader.onload = () => {
       setImagePreview(reader.result);
     };
     reader.readAsDataURL(file);
 
-    // Store the file in state
     setCategoryData({
       ...categoryData,
       image: file,
     });
+  };
+
+  const generateSlug = (name) => {
+    return name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
   };
 
   const handleSubmit = async (e) => {
@@ -55,19 +58,19 @@ const AddCategoryForm = ({ onAddCategory }) => {
     setIsSubmitting(true);
 
     try {
-      // Upload primary image
       const imageUrl = await uploadImage(categoryData.image);
-
-      // Format data for API
       const formattedData = {
-        ...categoryData,
-        __v: 0,
+        name: categoryData.name,
+        slug: categoryData.slug,
+        description: categoryData.description,
         image: imageUrl,
+        isActive: true,
+        parentCategory: null,
+        createdAt: new Date().toISOString(),
       };
 
-      // Send data to API
       const response = await fetch(
-        "https://urban-tuxedo-backend.vercel.app/api/categorys/",
+        "https://urban-tuxedo-backend.vercel.app/api/category/",
         {
           method: "POST",
           headers: {
@@ -82,8 +85,7 @@ const AddCategoryForm = ({ onAddCategory }) => {
       }
 
       const data = await response.json();
-
-      onAddCategory(data); // Notify parent component
+      onAddCategory(data);
       alert("Category added successfully!");
     } catch (error) {
       console.error("Error adding category:", error);
@@ -98,22 +100,16 @@ const AddCategoryForm = ({ onAddCategory }) => {
       <div className="bg-white rounded-lg p-8 max-w-4xl w-full max-h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-serif">Add New Category</h2>
-          <button
-            onClick={() => onAddCategory(false)}
-            className="text-gray-500 hover:text-gray-700"
-          >
+          <button onClick={() => onAddCategory(false)} className="text-gray-500 hover:text-gray-700">
             <FiX size={24} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left column */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category Title*
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category Title*</label>
                 <input
                   type="text"
                   name="name"
@@ -123,11 +119,19 @@ const AddCategoryForm = ({ onAddCategory }) => {
                   required
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description*
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                <input
+                  type="text"
+                  name="slug"
+                  value={categoryData.slug}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-md"
+                  disabled
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description*</label>
                 <textarea
                   name="description"
                   value={categoryData.description}
@@ -138,20 +142,10 @@ const AddCategoryForm = ({ onAddCategory }) => {
                 ></textarea>
               </div>
             </div>
-
-            {/*  Image Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Image
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
               <div className="mt-1 flex items-center">
-                <input
-                  type="file"
-                  ref={imageFileInputRef}
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  className="hidden"
-                />
+                <input type="file" ref={imageFileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
                 <button
                   type="button"
                   onClick={() => imageFileInputRef.current.click()}
@@ -159,14 +153,8 @@ const AddCategoryForm = ({ onAddCategory }) => {
                 >
                   {imagePreview ? (
                     <div className="w-full">
-                      <img
-                        src={imagePreview}
-                        alt=" preview"
-                        className="h-40 mx-auto object-contain rounded-md"
-                      />
-                      <p className="mt-2 text-center text-xs">
-                        Click to change image
-                      </p>
+                      <img src={imagePreview} alt="Preview" className="h-40 mx-auto object-contain rounded-md" />
+                      <p className="mt-2 text-center text-xs">Click to change image</p>
                     </div>
                   ) : (
                     <div className="text-center">

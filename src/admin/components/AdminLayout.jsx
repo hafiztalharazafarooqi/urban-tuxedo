@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { BiCategory } from "react-icons/bi";
 import {
-  FiBarChart2,
+  // FiBarChart2,
   FiBox,
   FiHome,
   FiLogOut,
   FiMenu,
-  FiSettings,
+  // FiSettings,
   FiShoppingBag,
   FiUsers,
   FiX,
@@ -24,8 +24,8 @@ function AdminLayout() {
     { path: '/admin/products', icon: FiBox, label: 'Products' },
     { path: '/admin/orders', icon: FiShoppingBag, label: 'Orders' },
     { path: '/admin/customers', icon: FiUsers, label: 'Customers' },
-    { path: '/admin/reports', icon: FiBarChart2, label: 'Reports' },
-    { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
+    // { path: '/admin/reports', icon: FiBarChart2, label: 'Reports' },
+    // { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
   ];
   
   const handleLogout = async (e) => {

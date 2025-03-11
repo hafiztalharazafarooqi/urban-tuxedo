@@ -13,6 +13,8 @@ function CategoryManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
+
   // Fetch category from API
   useEffect(() => {
     fetchCategory();
@@ -21,56 +23,41 @@ function CategoryManagement() {
   const fetchCategory = async () => {
     try {
       setLoading(true);
-      //   const response = await fetch(
-      //     "https://urban-tuxedo-backend.vercel.app/api/category/"
-      //   );
-      //   if (!response.ok) {
-      //     throw new Error(`API request failed with status: ${response.status}`);
-      //   }
-
-      //   const data = await response.json();
-      const data = {
-        category: [
-          {
-            _id: { $oid: "67c215614c72cfa77ea68888" },
-            name: "Formal Wear",
-            description: "Elegant tuxedos and suits for formal occasions",
-            image:
-              "https://images.pexels.com/photos/8605790/pexels-photo-8605790.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-            isActive: true,
-            createdAt: { $date: { $numberLong: "1740772705265" } },
-            slug: "formal-wear",
-            __v: { $numberInt: "0" },
-          },
-        ],
-      };
-
-      const formattedCategory = data.category.map((category) => {
-        return {
-          id: category._id, // Corrected from __id
+      const response = await fetch(`${BACKEND_URL}/category/`);
+      
+      if (!response.ok) {
+        throw new Error(`API request failed with status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      if (data.success) {
+        const formattedCategory = data.category.map((category) => ({
+          id: category._id,  // _id is already a string in actual API response
           name: category.name,
           status: category.isActive ? "Active" : "In-active",
-          image:
-            category.image ||
-            `https://source.unsplash.com/random/100x100/?tuxedo&sig=${category._id}`,
+          image: category.image || `https://source.unsplash.com/random/100x100/?tuxedo&sig=${category._id}`,
           description: category.description,
-        };
-      });
-
-      setCategory(formattedCategory);
+        }));
+  
+        setCategory(formattedCategory);
+      } else {
+        throw new Error("Failed to fetch categories from API.");
+      }
     } catch (err) {
       console.error("Error fetching category:", err);
-      setError("Failed to load category. Please try again later.");
+      setError("Failed to load categories. Please try again later.");
     } finally {
       setLoading(false);
     }
   };
+  
 
   const handleDeleteCategory = async (categoryId) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       try {
         const response = await fetch(
-          `https://urban-tuxedo-backend.vercel.app/api/category/${categoryId}`,
+          `${BACKEND_URL}/category/${categoryId}`,
           {
             method: "DELETE",
           }
@@ -196,6 +183,9 @@ function CategoryManagement() {
                     Category
                   </th>
                   <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -226,6 +216,13 @@ function CategoryManagement() {
                             </div>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full`}
+                        >
+                          {category.description}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
