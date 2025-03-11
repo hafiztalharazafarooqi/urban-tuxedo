@@ -43,7 +43,7 @@ function Login() {
       } else {
         const data = await response.json();
         toast.success("Login successful!");
-        data.user.role = 'admin';
+        // data.user.role = 'admin';
         localStorage.setItem("isLogin", JSON.stringify(data));
         setTimeout(() => {
           const defaultPage = data.user.role === 'user' ? '/' : '/admin';
