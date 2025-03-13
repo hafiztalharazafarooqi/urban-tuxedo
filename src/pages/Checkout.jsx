@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 function Checkout() {
-  const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -21,8 +18,6 @@ function Checkout() {
   const shippingCost = 15.0;
 
   // Popup state
-  const [orderId, setOrderId] = useState(null);
-  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -40,7 +35,7 @@ function Checkout() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const orderData = {
@@ -60,20 +55,31 @@ function Checkout() {
       items: cartItems,
       totalAmount: subtotal + shippingCost,
     };
+    const BACKEND_URL = import.meta.env.VITE_API_URL;
 
-    console.log("Order Placed:", orderData);
-    // Generate a random order ID (for demo purposes)
-    const generatedOrderId = Math.floor(Math.random() * 1000000);
-    setOrderId(generatedOrderId);
-    setShowPopup(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/products/checkout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
 
-    // Here you can send `orderData` to your backend via an API request
-  };
+      if (!response.ok) {
+        throw new Error("Failed to place order");
+      }
 
-  const handleClosePopup = () => {
-    localStorage.removeItem("cart");
-    setShowPopup(false);
-    navigate("/");
+      const data = await response.json();
+
+      window.location.href = data.url;
+      // setOrderId(data.orderId);
+      // setShowPopup(true);
+    } catch (error) {
+      console.error("Error placing order:", error);
+      // You might want to show an error message to the user here
+      alert("Failed to place order. Please try again.");
+    }
   };
 
   return (
@@ -171,24 +177,6 @@ function Checkout() {
               </div>
             </div>
 
-            {/* Payment Method */}
-            <div>
-              <h2 className="font-serif text-xl mb-4">Payment Method</h2>
-              <div className="space-y-2">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="cod"
-                    checked={formData.paymentMethod === "cod"}
-                    onChange={handleChange}
-                    className="mr-2"
-                  />
-                  Cash on Delivery
-                </label>
-              </div>
-            </div>
-
             <button
               type="submit"
               className="w-full px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
@@ -219,26 +207,6 @@ function Checkout() {
           </div>
         </div>
       </div>
-
-      {/* Popup Modal */}
-      {showPopup && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div
-            className="absolute inset-0 bg-black opacity-50"
-            onClick={handleClosePopup}
-          ></div>
-          <div className="bg-white p-8 rounded-lg shadow-lg z-10 max-w-sm mx-auto text-center">
-            <h2 className="text-2xl font-bold mb-4">Order Placed!</h2>
-            <p className="mb-6">Your order ID is {orderId}</p>
-            <button
-              onClick={handleClosePopup}
-              className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

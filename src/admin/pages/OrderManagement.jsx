@@ -11,49 +11,34 @@ function OrderManagement() {
   const [paymentFilter, setPaymentFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
 
-  // Simulate an API fetch using dummy data
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        // Dummy API response
-        const data = {
-          orders: [
-            {
-              id: "2024001",
-              customer: "John Doe",
-              date: new Date(),
-              total: 599.99,
-              status: "Processing",
-              payment: "Paid",
-            },
-            {
-              id: "2024002",
-              customer: "Jane Smith",
-              date: new Date(),
-              total: 299.99,
-              status: "Shipped",
-              payment: "Paid",
-            },
-            {
-              id: "2024003",
-              customer: "Bob Brown",
-              date: new Date(),
-              total: 899.99,
-              status: "Delivered",
-              payment: "Pending",
-            },
-          ],
-        };
+        const response = await fetch(`${BACKEND_URL}/order/`);
+        const data = await response.json();
 
-        // Simulate a delay (optional)
-        setTimeout(() => {
-          setOrders(data.orders);
-          setLoading(false);
-        }, 500);
+        if (!data.success) {
+          throw new Error("Failed to fetch orders");
+        }
+
+        // Map API response to match component's expected data structure
+        const formattedOrders = data.order.map((order) => ({
+          id: order._id,
+          customer: `${order.customer.firstName} ${order.customer.lastName}`,
+          date: new Date(order.createdAt),
+          total: order.totalAmount,
+          status: "Processing", // You may need to update this based on API response
+          payment: order.paymentMethod === "cod" ? "Cash on Delivery" : "Paid",
+        }));
+
+        setOrders(formattedOrders);
       } catch (err) {
         console.error("Error fetching orders:", err);
         setError("Failed to load orders. Please try again later.");
+      } finally {
         setLoading(false);
       }
     };
@@ -75,7 +60,6 @@ function OrderManagement() {
       ? order.payment.toLowerCase() === paymentFilter.toLowerCase()
       : true;
 
-    // If a date filter is set, compare formatted date strings (yyyy-MM-dd)
     const matchesDate = dateFilter
       ? format(order.date, "yyyy-MM-dd") === dateFilter
       : true;
@@ -115,8 +99,7 @@ function OrderManagement() {
           >
             <option value="">Payment Status</option>
             <option value="Paid">Paid</option>
-            <option value="Pending">Pending</option>
-            <option value="Failed">Failed</option>
+            <option value="Cash on Delivery">Cash on Delivery</option>
           </select>
           <input
             type="date"

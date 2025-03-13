@@ -1,11 +1,5 @@
-import {
-  ChevronRight,
-  LogOut,
-  Package,
-  Settings,
-  User
-} from "lucide-react";
-import { useState } from "react";
+import { ChevronRight, LogOut, Package, Settings, User } from "lucide-react";
+import { useEffect, useState } from "react";
 import ProfileDetails from "./ProfileDetails.jsx";
 import ProfileOrder from "./ProfileOrder.jsx";
 import ProfileSettings from "./ProfileSettings.jsx";
@@ -13,18 +7,34 @@ import ProfileWshlist from "./ProfileWishlist.jsx";
 
 function Profile() {
   const [activeTab, setActiveTab] = useState("profile");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [initial, setInitial] = useState("");
 
   const onLogout = async (e) => {
     e.preventDefault();
 
     try {
       localStorage.removeItem("isLogin");
+      localStorage.removeItem("cart");
       window.dispatchEvent(new Event("storage")); // Notify other components
       window.location.href = "/login";
     } catch (error) {
       console.error("Logout failed: ", error.message);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      const user = JSON.parse(localStorage.getItem("isLogin"));
+      if (user) {
+        const storedProfile = JSON.parse(localStorage.getItem("isLogin")).user;
+        setName(`${storedProfile.firstName} ${storedProfile.lastName}`);
+        setEmail(storedProfile.email);
+        setInitial(`${user.user.firstName?.charAt(0).toUpperCase()}${user.user.lastName?.charAt(0).toUpperCase()}`);
+      }
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -55,11 +65,11 @@ function Profile() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-6 transform">
               <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center shadow-md">
-                <span className="text-3xl font-bold text-red-500">JD</span>
+                <span className="text-3xl font-bold text-red-500">{initial}</span>
               </div>
               <div>
-                <h2 className="text-2xl font-bold">John Doe</h2>
-                <p className="text-gray-600">john.doe@example.com</p>
+                <h2 className="text-2xl font-bold">{name}</h2>
+                <p className="text-gray-600">{email}</p>
               </div>
             </div>
             <button

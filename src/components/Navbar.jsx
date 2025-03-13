@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { FiLogIn, FiMenu, FiShoppingCart, FiX } from "react-icons/fi";
 import { Link } from "react-router-dom";
-import { FiMenu, FiX, FiShoppingCart, FiUser, FiLogIn } from "react-icons/fi";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,7 +45,7 @@ function Navbar() {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("isLogin"));
     if (user) {
-      setInitial(user.user.username.charAt(0).toUpperCase());
+      setInitial(`${user.user.firstName?.charAt(0).toUpperCase()}${user.user.lastName?.charAt(0).toUpperCase()}`);
     }
   }, [isLoggedIn]);
 

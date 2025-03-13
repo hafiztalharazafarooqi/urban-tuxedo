@@ -33,6 +33,7 @@ function AdminLayout() {
 
     try {
       localStorage.removeItem("isLogin");
+      localStorage.removeItem("cart");
       window.dispatchEvent(new Event("storage")); // Notify other components
       window.location.href = "/login";
     } catch (error) {

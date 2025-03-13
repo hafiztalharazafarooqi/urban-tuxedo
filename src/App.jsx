@@ -29,6 +29,7 @@ import ProtectedRoute from "./core/protected-route";
 import ForgetPassword from "./pages/ForgetPassword";
 import CategoryManagement from "./admin/pages/CategoryManagement";
 import OrderDetail from "./admin/pages/OrderDetails";
+import CheckoutSuccess from "./pages/checkoutSuccess";
 
 function ClientLayout() {
   return (
@@ -67,7 +68,7 @@ function App() {
           <Route path="category" element={<CategoryManagement />} />
           <Route path="products" element={<ProductManagement />} />
           <Route path="orders" element={<OrderManagement />} />
-          <Route path="order/:id" element={<OrderDetail />} />
+          <Route path="order/:orderId" element={<OrderDetail />} />
           <Route path="customers" element={<CustomerManagement />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
@@ -95,6 +96,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="checkout-success/:orderId" element={<CheckoutSuccess />} />
+
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="forget-password" element={<ForgetPassword />} />

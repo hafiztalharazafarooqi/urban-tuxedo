@@ -1,18 +1,16 @@
 import {
     Edit
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function ProfileDetails() {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "+1 234 567 8900",
-    address: "123 Fashion Street, New York, NY 10001, United States",
-    paymentMethod: "Visa ending in 4242",
-    expiry: "Expires 12/2026"
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: ""
   });
 
   const handleEditClick = () => {
@@ -29,6 +27,20 @@ function ProfileDetails() {
     setIsEditing(false);
     alert("Profile updated successfully!");
   };
+
+  useEffect(() => {
+    return () => {
+      const storedProfile = JSON.parse(localStorage.getItem('isLogin')).user;
+      setProfile({
+        firstName: storedProfile.firstName,
+        lastName: storedProfile.lastName,
+        email: storedProfile.email,
+        phone: storedProfile.phone,
+        address: storedProfile.addresses[0] ? `${storedProfile.addresses[0].street} ${storedProfile.addresses[0].state}, ${storedProfile.addresses[0].country }` : ``
+      });
+    }
+  }, [])
+  
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">

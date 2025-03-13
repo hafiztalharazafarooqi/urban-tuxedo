@@ -12,6 +12,7 @@ function ProductManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
 
   // Fetch products from API
   useEffect(() => {
@@ -21,9 +22,7 @@ function ProductManagement() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        "https://urban-tuxedo-backend.vercel.app/api/products/"
-      );
+      const response = await fetch(`${BACKEND_URL}/products/`);
       if (!response.ok) {
         throw new Error(`API request failed with status: ${response.status}`);
       }
