@@ -11,6 +11,7 @@ function Login() {
     remember: false,
   });
   const [message, setMessage] = useState("");
+  const [loader, setLoader] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,19 +24,18 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoader(true);
+    const BACKEND_URL = import.meta.env.VITE_API_URL;
 
     try {
-      const response = await fetch(
-        "https://urban-tuxedo-backend.vercel.app/api/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
-        }
-      );
+      const response = await fetch(`${BACKEND_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -44,17 +44,19 @@ function Login() {
         const data = await response.json();
         toast.success("Login successful!");
         localStorage.setItem("isLogin", JSON.stringify(data));
-
         setTimeout(() => {
-          const redirectUrl = localStorage.getItem("redirectAfterLogin") || "/";
-          console.log(redirectUrl);
-          
           localStorage.removeItem("redirectAfterLogin"); // Clear after use
+          window.dispatchEvent(new Event("storage")); // Notify other components
+          setLoader(false);
+          const defaultPage = data.user.role === "user" ? "/" : "/admin";
+          const redirectUrl =
+            localStorage.getItem("redirectAfterLogin") || defaultPage;
           navigate(redirectUrl);
           // navigate('/');
         }, 2000);
       }
     } catch (error) {
+      setLoader(false);
       setMessage(`Login failed: ${error.message}`);
     }
   };
@@ -84,7 +86,7 @@ function Login() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-gold focus:border-gold"
+                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-red-600 focus:border-red-600"
               />
             </div>
             <div>
@@ -101,7 +103,7 @@ function Login() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-gold focus:border-gold"
+                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-red-600 focus:border-red-600"
               />
             </div>
           </div>
@@ -114,7 +116,7 @@ function Login() {
                 type="checkbox"
                 checked={formData.remember}
                 onChange={handleChange}
-                className="h-4 w-4 text-gold focus:ring-gold border-gray-300 rounded"
+                className="h-4 w-4 text-red-600 focus:ring-red-600 border-gray-300 rounded"
               />
               <label
                 htmlFor="remember-me"
@@ -125,19 +127,28 @@ function Login() {
             </div>
 
             <div className="text-sm">
-              <a href="#" className="text-gold hover:text-gold-light">
+              <Link
+                to="/forget-password"
+                className="text-red-600 hover:text-red-600-light"
+              >
                 Forgot your password?
-              </a>
+              </Link>
             </div>
           </div>
 
-          <button type="submit" className="btn btn-gold w-full">
-            Sign in
+          <button
+            type="submit"
+            className="w-full px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          >
+            {loader ? "Signing in..." : "Sign in"}
           </button>
 
           <p className="text-center text-sm">
             Don&apos;t have an account?{" "}
-            <Link to="/register" className="text-gold hover:text-gold-light">
+            <Link
+              to="/register"
+              className="text-red-600 hover:text-red-600-light"
+            >
               Sign up
             </Link>
           </p>

@@ -1,18 +1,59 @@
-import { useState } from 'react';
-import { format } from 'date-fns';
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { FiXSquare } from "react-icons/fi";
 
 function CustomerManagement() {
-  const [customers] = useState([
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      joinDate: new Date(2024, 0, 15),
-      orders: 5,
-      totalSpent: 2499.95,
-    },
-    // Add more dummy customers
-  ]);
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("");
+
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${BACKEND_URL}/customer/`);
+        const data = await response.json();
+        if (data.success) {
+          const array = data.customer.filter(
+            (element) => element?.role === "user"
+          );
+          setCustomers(array);
+        } else {
+          throw new Error("Failed to fetch customers");
+        }
+      } catch (error) {
+        console.log(error);
+        setError("Failed to load customers. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomers();
+  }, []);
+
+  // Filtering and sorting logic
+  const filteredCustomers = customers
+    .filter((customer) => {
+      const matchesSearch =
+        customer.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.email.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      if (!sortBy) return 0;
+      if (sortBy === "name") return a.fullName.localeCompare(b.fullName);
+      if (sortBy === "orders") return a.orders.length - b.orders.length;
+      if (sortBy === "date")
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      return 0;
+    });
 
   return (
     <div className="space-y-8">
@@ -24,93 +65,106 @@ function CustomerManagement() {
           <input
             type="text"
             placeholder="Search customers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="px-4 py-2 border rounded-md"
           />
-          <select className="px-4 py-2 border rounded-md">
-            <option value="">Sort By </option>
+          <select
+            className="px-4 py-2 border rounded-md"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="">Sort By</option>
             <option value="name">Name</option>
             <option value="orders">Orders</option>
-            <option value="spent">Total Spent</option>
             <option value="date">Join Date</option>
-          </select>
-          <select className="px-4 py-2 border rounded-md">
-            <option value="">Customer Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
           </select>
         </div>
       </div>
 
-      {/* Customers Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Join Date
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Orders
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Spent
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {customers.map((customer) => (
-                <tr key={customer.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 flex-shrink-0">
-                        <img
-                          className="h-10 w-10 rounded-full"
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                            customer.name
-                          )}&background=random`}
-                          alt=""
-                        />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {customer.name}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{customer.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {format(customer.joinDate, 'MMM dd, yyyy')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {customer.orders}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {customer.totalSpent.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900">
-                      View Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      
+
+      {/* Loading and Error States */}
+      {loading && (
+        <div className="flex justify-center p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading customer...</p>
+          </div>
         </div>
-      </div>
+      )}
+
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <span className="flex justify-between">
+            <span className="block sm:inline">
+              <strong className="font-bold">Error! </strong> {error}
+            </span>
+            <button
+              className="text-red-900 hover:text-red-700"
+              onClick={() => setError(null)}
+            >
+              <FiXSquare />
+            </button>
+          </span>
+        </div>
+      )}
+      
+      {/* Customers Table */}
+      {!loading && !error && (
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">
+                    Customer
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">
+                    Join Date
+                  </th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">
+                    Orders
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredCustomers.length > 0 ? (
+                  filteredCustomers.map((customer) => (
+                    <tr key={customer.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {customer.fullName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {customer.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {format(new Date(customer.createdAt), "MMM dd, yyyy")}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {customer.orders.length}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="5"
+                      className="px-6 py-4 text-center text-gray-500"
+                    >
+                      No customers found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

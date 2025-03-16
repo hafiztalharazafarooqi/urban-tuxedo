@@ -1,76 +1,63 @@
 import { useEffect, useState } from "react";
 import { FiPlus, FiTrash2, FiXSquare } from "react-icons/fi";
-import AddProductForm from "./AddProduct";
+import AddCategoryForm from "./AddCategory";
+// import AddCategoryForm from "./AddCategory";
 
-function ProductManagement() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+function CategoryManagement() {
+  const [category, setCategory] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
-  // Fetch products from API
+  // Fetch category from API
   useEffect(() => {
-    fetchProducts();
+    fetchCategory();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchCategory = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${BACKEND_URL}/products/`);
+      const response = await fetch(`${BACKEND_URL}/category/`);
+      
       if (!response.ok) {
         throw new Error(`API request failed with status: ${response.status}`);
       }
-
+  
       const data = await response.json();
-
-      const formattedProducts = data.products.map((product) => {
-        const categoryParts = product.category
-          ? product.category.split("/")
-          : [];
-        const mainCategory =
-          categoryParts.length > 0 ? categoryParts[0].trim() : "Uncategorized";
-
-        return {
-          id: product._id, // Corrected from __id
-          name: product.title,
-          category: mainCategory,
-          price: product.price,
-          stock: product.defaultQuantity || 0,
-          status:
-            product.defaultQuantity && product.defaultQuantity > 0
-              ? "In Stock"
-              : "Out of Stock",
-          images: {
-            primary:
-              product.images?.primary ||
-              `https://source.unsplash.com/random/100x100/?tuxedo&sig=${product._id}`,
-            gallery: product.images?.gallery || [],
-          },
-          sizes: product.availableSizes || [],
-          description: product.description,
-        };
-      });
-
-      setProducts(formattedProducts);
+  
+      if (data.success) {
+        const formattedCategory = data.category.map((category) => ({
+          id: category._id,  // _id is already a string in actual API response
+          name: category.name,
+          status: category.isActive ? "Active" : "In-active",
+          image: category.image || `https://source.unsplash.com/random/100x100/?tuxedo&sig=${category._id}`,
+          description: category.description,
+        }));
+  
+        setCategory(formattedCategory);
+      } else {
+        throw new Error("Failed to fetch categories from API.");
+      }
     } catch (err) {
-      console.error("Error fetching products:", err);
-      setError("Failed to load products. Please try again later.");
+      console.error("Error fetching category:", err);
+      setError("Failed to load categories. Please try again later.");
     } finally {
       setLoading(false);
     }
   };
+  
 
-  const handleDeleteProduct = async (productId) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
+  const handleDeleteCategory = async (categoryId) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
       try {
         const response = await fetch(
-          `https://urban-tuxedo-backend.vercel.app/api/products/${productId}`,
+          `${BACKEND_URL}/category/${categoryId}`,
           {
             method: "DELETE",
           }
@@ -78,78 +65,68 @@ function ProductManagement() {
 
         if (!response.ok) {
           throw new Error(
-            `Failed to delete product. Status: ${response.status}`
+            `Failed to delete category. Status: ${response.status}`
           );
         }
 
-        fetchProducts();
-        setSuccess("Product deleted successfully!");
+        fetchCategory();
+        setSuccess("Category deleted successfully!");
       } catch (error) {
-        console.error("Error deleting product:", error);
-        setError("Failed to delete the product. Please try again.");
+        console.error("Error deleting category:", error);
+        setError("Failed to delete the category. Please try again.");
       }
     }
   };
 
-  const handleAddProduct = (e) => {
+  const handleAddCategory = (e) => {
     console.log(e);
     setShowAddModal(false);
-    // After successful addition, fetch products again
-    fetchProducts();
+    // After successful addition, fetch category again
+    fetchCategory();
   };
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
+  const filteredCategory = category.filter((category) => {
+    const matchesSearch = category.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      !categoryFilter || product.category === categoryFilter;
     const matchesStatus =
       !statusFilter ||
-      product.status.toLowerCase().includes(statusFilter.toLowerCase());
-    return matchesSearch && matchesCategory && matchesStatus;
+      category.status.toLowerCase().includes(statusFilter.toLowerCase());
+    return matchesSearch && matchesStatus;
   });
 
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-serif">Product Management</h1>
+        <h1 className="text-3xl font-serif">Category Management</h1>
         <div className="flex gap-4">
           <button
             className="flex items-center gap-2 px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             onClick={() => setShowAddModal(true)}
           >
-            <FiPlus /> Add New Product
+            <FiPlus /> Add New Category
           </button>
         </div>
       </div>
 
       {/* Filters */}
       <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
-            placeholder="Search products..."
+            placeholder="Search category..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="px-4 py-2 border rounded-md"
           />
           <select
             className="px-4 py-2 border rounded-md"
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-          >
-            <option value="">All Categories</option>
-          </select>
-          <select
-            className="px-4 py-2 border rounded-md"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">All Status</option>
-            <option value="in-stock">In Stock</option>
-            <option value="low-stock">Low Stock</option>
-            <option value="out-of-stock">Out of Stock</option>
+            <option value="active">Active</option>
+            <option value="in-active">In Active</option>
           </select>
         </div>
       </div>
@@ -159,7 +136,7 @@ function ProductManagement() {
         <div className="flex justify-center p-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading products...</p>
+            <p className="mt-4 text-gray-600">Loading category...</p>
           </div>
         </div>
       )}
@@ -195,7 +172,7 @@ function ProductManagement() {
         </div>
       )}
 
-      {/* Products Table */}
+      {/* category Table */}
       {!loading && !error && (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="overflow-x-auto">
@@ -203,16 +180,10 @@ function ProductManagement() {
               <thead>
                 <tr>
                   <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Product
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Category
                   </th>
                   <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stock
+                    Description
                   </th>
                   <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -223,71 +194,58 @@ function ProductManagement() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredProducts.length > 0 ? (
-                  filteredProducts.map((product) => (
-                    <tr key={product.id}>
+                {filteredCategory.length > 0 ? (
+                  filteredCategory.map((category) => (
+                    <tr key={category.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0">
                             <img
                               className="h-10 w-10 rounded-full object-cover"
-                              src={product.images.primary}
-                              alt={product.name}
+                              src={category.image}
+                              alt={category.name}
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = `https://source.unsplash.com/random/100x100/?tuxedo&sig=${product.id}`;
+                                e.target.src = `https://source.unsplash.com/random/100x100/?tuxedo&sig=${category.id}`;
                               }}
                             />
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {product.name}
+                              {category.name}
                             </div>
-                            {product.sizes && product.sizes.length > 0 && (
-                              <div className="text-xs text-gray-500">
-                                Sizes: {product.sizes.join(", ")}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {product.category}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          ${product.price.toFixed(2)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {product.stock}
-                        </div>
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full`}
+                        >
+                          {category.description}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            product.status === "In Stock"
+                            category.status === "Active"
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {product.status}
+                          {category.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           {/* <button
                             className="text-blue-600 hover:text-blue-900"
-                            onClick={() => handleEditProduct(product)}
+                            onClick={() => handleEditCategory(category)}
                           >
                             <FiEdit2 />
                           </button> */}
                           <button
                             className="text-red-600 hover:text-red-900"
-                            onClick={() => handleDeleteProduct(product.id)}
+                            onClick={() => handleDeleteCategory(category.id)}
                           >
                             <FiTrash2 />
                           </button>
@@ -301,7 +259,7 @@ function ProductManagement() {
                       colSpan="6"
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      No products found
+                      No category found
                     </td>
                   </tr>
                 )}
@@ -311,12 +269,12 @@ function ProductManagement() {
         </div>
       )}
 
-      {/* Add Product Modal */}
+      {/* Add Category Modal */}
       {showAddModal && (
-        <AddProductForm onAddProduct={() => handleAddProduct(event)} />
+        <AddCategoryForm onAddCategory={() => handleAddCategory(event)} />
       )}
     </div>
   );
 }
 
-export default ProductManagement;
+export default CategoryManagement;

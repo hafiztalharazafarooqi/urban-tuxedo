@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function AdminLogin() {
-  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Add authentication logic here
-    navigate('/admin');
+    navigate("/admin");
   };
 
   return (
@@ -24,34 +24,47 @@ function AdminLogin() {
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <input
                 id="email"
                 type="email"
                 value={credentials.email}
-                onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
+                onChange={(e) =>
+                  setCredentials({ ...credentials, email: e.target.value })
+                }
                 required
-                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-gold focus:border-gold"
+                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-red-600 focus:border-red-600"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <input
                 id="password"
                 type="password"
                 value={credentials.password}
-                onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                onChange={(e) =>
+                  setCredentials({ ...credentials, password: e.target.value })
+                }
                 required
-                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-gold focus:border-gold"
+                className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-red-600 focus:border-red-600"
               />
             </div>
           </div>
 
-          <button type="submit" className="btn btn-gold w-full">
+          <button
+            type="submit"
+            className=" w-full px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          >
             Sign in
           </button>
         </form>

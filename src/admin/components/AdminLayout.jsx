@@ -1,34 +1,43 @@
 import { useState } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { BiCategory } from "react-icons/bi";
 import {
-  FiHome,
+  // FiBarChart2,
   FiBox,
+  FiLogOut,
+  FiMenu,
+  // FiSettings,
   FiShoppingBag,
   FiUsers,
-  FiBarChart2,
-  FiSettings,
-  FiMenu,
-  FiX,
-  FiLogOut,
+  FiX
 } from 'react-icons/fi';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+
 
 function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
   const menuItems = [
-    { path: '/admin', icon: FiHome, label: 'Dashboard' },
+    // { path: '/admin', icon: FiHome, label: 'Dashboard' },
+    { path: '/admin', icon: BiCategory, label: 'Category' },
     { path: '/admin/products', icon: FiBox, label: 'Products' },
     { path: '/admin/orders', icon: FiShoppingBag, label: 'Orders' },
     { path: '/admin/customers', icon: FiUsers, label: 'Customers' },
-    { path: '/admin/reports', icon: FiBarChart2, label: 'Reports' },
-    { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
+    // { path: '/admin/reports', icon: FiBarChart2, label: 'Reports' },
+    // { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
   ];
+  
+  const handleLogout = async (e) => {
+    e.preventDefault();
 
-  const handleLogout = () => {
-    // Handle logout logic here
-    navigate('/admin/login');
+    try {
+      localStorage.removeItem("isLogin");
+      localStorage.removeItem("cart");
+      window.dispatchEvent(new Event("storage")); // Notify other components
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout failed: ", error.message);
+    }
   };
 
   return (
@@ -66,7 +75,7 @@ function AdminLayout() {
                   to={item.path}
                   className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
                     location.pathname === item.path
-                      ? 'bg-gold text-white'
+                      ? 'bg-red-600 text-white'
                       : 'hover:bg-gray-100'
                   }`}
                 >
