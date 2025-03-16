@@ -2,14 +2,29 @@ import { useEffect, useRef, useState } from "react";
 import { FiPlus, FiUpload, FiX } from "react-icons/fi";
 import PropTypes from "prop-types";
 
-// Mock function to simulate image upload
 const uploadImage = async (file) => {
-  // Replace this with your actual image upload logic
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`https://example.com/${file.name}`);
-    }, 1000);
-  });
+  if (!file) return null;
+
+  const apiKey = "87b38229ce97791b612d8ccae0d12b16"; // Replace with your ImgBB API key
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  try {
+    const response = await fetch(
+      `https://api.imgbb.com/1/upload?key=${apiKey}`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+    return data.success ? data.data.url : null;
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    return null;
+  }
 };
 
 const AddProductForm = ({ onAddProduct }) => {
@@ -17,7 +32,7 @@ const AddProductForm = ({ onAddProduct }) => {
     title: "",
     price: "",
     description: "",
-    categories: "",
+    category: "",
     images: {
       primary: null,
       gallery: [],
@@ -30,7 +45,6 @@ const AddProductForm = ({ onAddProduct }) => {
   const [primaryImagePreview, setPrimaryImagePreview] = useState(null);
   const [galleryPreviews, setGalleryPreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
   const [categoryList, setCategoryList] = useState([]);
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
@@ -40,6 +54,7 @@ const AddProductForm = ({ onAddProduct }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log(name, value);
     setProductData({
       ...productData,
       [name]: value,
@@ -183,10 +198,10 @@ const AddProductForm = ({ onAddProduct }) => {
     }
   };
   useEffect(() => {
-    getCategories();
+    getCategory();
   }, []);
 
-  const getCategories = async () => {
+  const getCategory = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/category`, {
         method: "GET",
@@ -202,8 +217,7 @@ const AddProductForm = ({ onAddProduct }) => {
 
       setCategoryList(formattedCategory);
     } catch (error) {
-      console.warn(`Failed to fetch categories: ${error.message}`);
-      setError("Failed to load categories. Please try again later.");
+      console.warn(`Failed to fetch category: ${error.message}`);
     }
   };
 
@@ -256,11 +270,12 @@ const AddProductForm = ({ onAddProduct }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Categories*
+                  Category*
                 </label>
                 <select
+                  name="category"
                   className="w-full px-4 py-2 border rounded-md"
-                  value={productData.categories}
+                  value={productData.category}
                   onChange={handleChange}
                   required
                 >
@@ -273,8 +288,8 @@ const AddProductForm = ({ onAddProduct }) => {
 
                 {/* <input
                   type="text"
-                  name="categories"
-                  value={productData.categories}
+                  name="category"
+                  value={productData.category}
                   onChange={handleChange}
                   placeholder="e.g. Accessories/Formal Wear"
                   className="w-full px-4 py-2 border rounded-md"

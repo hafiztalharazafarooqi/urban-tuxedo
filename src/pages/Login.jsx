@@ -26,7 +26,7 @@ function Login() {
     e.preventDefault();
     setLoader(true);
     const BACKEND_URL = import.meta.env.VITE_API_URL;
-    
+
     try {
       const response = await fetch(`${BACKEND_URL}/auth/login`, {
         method: "POST",
@@ -43,16 +43,15 @@ function Login() {
       } else {
         const data = await response.json();
         toast.success("Login successful!");
-        // data.user.role = 'admin';
         localStorage.setItem("isLogin", JSON.stringify(data));
         setTimeout(() => {
-          const defaultPage = data.user.role === 'user' ? '/' : '/admin';
-          const redirectUrl = localStorage.getItem("redirectAfterLogin") || defaultPage;
-          
           localStorage.removeItem("redirectAfterLogin"); // Clear after use
           window.dispatchEvent(new Event("storage")); // Notify other components
-          navigate(redirectUrl);
           setLoader(false);
+          const defaultPage = data.user.role === "user" ? "/" : "/admin";
+          const redirectUrl =
+            localStorage.getItem("redirectAfterLogin") || defaultPage;
+          navigate(redirectUrl);
           // navigate('/');
         }, 2000);
       }
@@ -128,7 +127,10 @@ function Login() {
             </div>
 
             <div className="text-sm">
-              <Link to="/forget-password" className="text-red-600 hover:text-red-600-light">
+              <Link
+                to="/forget-password"
+                className="text-red-600 hover:text-red-600-light"
+              >
                 Forgot your password?
               </Link>
             </div>
@@ -138,7 +140,7 @@ function Login() {
             type="submit"
             className="w-full px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
-            {loader ? 'Signing in...' : 'Sign in'}
+            {loader ? "Signing in..." : "Sign in"}
           </button>
 
           <p className="text-center text-sm">

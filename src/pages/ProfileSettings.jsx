@@ -112,7 +112,7 @@ function ProfileSettings() {
           </form>
         </div>
 
-        <div>
+        {/* <div>
           <h3 className="text-xl font-medium mb-6 text-red-500">Danger Zone</h3>
           <p className="text-gray-600 mb-6">
             Once you delete your account, there is no going back. Please be
@@ -121,7 +121,7 @@ function ProfileSettings() {
           <button className="px-8 py-3 bg-white border-2 border-red-500 text-red-500 font-medium rounded-full hover:bg-red-50 transition">
             Delete Account
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

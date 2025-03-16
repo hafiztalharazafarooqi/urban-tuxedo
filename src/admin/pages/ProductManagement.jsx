@@ -30,8 +30,8 @@ function ProductManagement() {
       const data = await response.json();
 
       const formattedProducts = data.products.map((product) => {
-        const categoryParts = product.categories
-          ? product.categories.split("/")
+        const categoryParts = product.category
+          ? product.category.split("/")
           : [];
         const mainCategory =
           categoryParts.length > 0 ? categoryParts[0].trim() : "Uncategorized";

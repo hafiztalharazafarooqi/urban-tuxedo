@@ -3,11 +3,28 @@ import { useRef, useState } from "react";
 import { FiUpload, FiX } from "react-icons/fi";
 
 const uploadImage = async (file) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`https://example.com/${file?.name}`);
-    }, 1000);
-  });
+  if (!file) return null;
+
+  const apiKey = '87b38229ce97791b612d8ccae0d12b16'; // Replace with your ImgBB API key
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  try {
+    const response = await fetch(
+      `https://api.imgbb.com/1/upload?key=${apiKey}`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+    return data.success ? data.data.url : null;
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    return null;
+  }
 };
 
 const AddCategoryForm = ({ onAddCategory }) => {
@@ -23,6 +40,7 @@ const AddCategoryForm = ({ onAddCategory }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const imageFileInputRef = useRef(null);
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,7 +68,10 @@ const AddCategoryForm = ({ onAddCategory }) => {
   };
 
   const generateSlug = (name) => {
-    return name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
   };
 
   const handleSubmit = async (e) => {
@@ -69,16 +90,13 @@ const AddCategoryForm = ({ onAddCategory }) => {
         createdAt: new Date().toISOString(),
       };
 
-      const response = await fetch(
-        "https://urban-tuxedo-backend.vercel.app/api/category/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formattedData),
-        }
-      );
+      const response = await fetch(`${BACKEND_URL}/category/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formattedData),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to add category");
@@ -100,7 +118,10 @@ const AddCategoryForm = ({ onAddCategory }) => {
       <div className="bg-white rounded-lg p-8 max-w-4xl w-full max-h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-serif">Add New Category</h2>
-          <button onClick={() => onAddCategory(false)} className="text-gray-500 hover:text-gray-700">
+          <button
+            onClick={() => onAddCategory(false)}
+            className="text-gray-500 hover:text-gray-700"
+          >
             <FiX size={24} />
           </button>
         </div>
@@ -109,7 +130,9 @@ const AddCategoryForm = ({ onAddCategory }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category Title*</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category Title*
+                </label>
                 <input
                   type="text"
                   name="name"
@@ -120,7 +143,9 @@ const AddCategoryForm = ({ onAddCategory }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Slug
+                </label>
                 <input
                   type="text"
                   name="slug"
@@ -131,7 +156,9 @@ const AddCategoryForm = ({ onAddCategory }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description*</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description*
+                </label>
                 <textarea
                   name="description"
                   value={categoryData.description}
@@ -143,9 +170,17 @@ const AddCategoryForm = ({ onAddCategory }) => {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Image
+              </label>
               <div className="mt-1 flex items-center">
-                <input type="file" ref={imageFileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
+                <input
+                  type="file"
+                  ref={imageFileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="hidden"
+                />
                 <button
                   type="button"
                   onClick={() => imageFileInputRef.current.click()}
@@ -153,8 +188,14 @@ const AddCategoryForm = ({ onAddCategory }) => {
                 >
                   {imagePreview ? (
                     <div className="w-full">
-                      <img src={imagePreview} alt="Preview" className="h-40 mx-auto object-contain rounded-md" />
-                      <p className="mt-2 text-center text-xs">Click to change image</p>
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="h-40 mx-auto object-contain rounded-md"
+                      />
+                      <p className="mt-2 text-center text-xs">
+                        Click to change image
+                      </p>
                     </div>
                   ) : (
                     <div className="text-center">

@@ -46,6 +46,8 @@ function Register() {
     // Prepare payload. The role is defaulted to "user"
     const payload = {
       username,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       email: formData.email,
       password: formData.password,
       role: "user",

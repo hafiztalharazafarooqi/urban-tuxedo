@@ -19,17 +19,16 @@ import Register from "./pages/Register";
 // Admin Routes
 import AdminLayout from "./admin/components/AdminLayout";
 import AdminLogin from "./admin/pages/AdminLogin";
+import CategoryManagement from "./admin/pages/CategoryManagement";
 import CustomerManagement from "./admin/pages/CustomerManagement";
-import AdminDashboard from "./admin/pages/Dashboard";
+import OrderDetail from "./admin/pages/OrderDetails";
 import OrderManagement from "./admin/pages/OrderManagement";
 import ProductManagement from "./admin/pages/ProductManagement";
 import Reports from "./admin/pages/Reports";
 import Settings from "./admin/pages/Settings";
 import ProtectedRoute from "./core/protected-route";
-import ForgetPassword from "./pages/ForgetPassword";
-import CategoryManagement from "./admin/pages/CategoryManagement";
-import OrderDetail from "./admin/pages/OrderDetails";
 import CheckoutSuccess from "./pages/checkoutSuccess";
+import ForgetPassword from "./pages/ForgetPassword";
 
 function ClientLayout() {
   return (
@@ -61,7 +60,7 @@ function App() {
             index
             element={
               <ProtectedRoute>
-                <AdminDashboard />
+                <CategoryManagement />
               </ProtectedRoute>
             }
           />

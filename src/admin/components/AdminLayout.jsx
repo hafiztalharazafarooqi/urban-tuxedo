@@ -3,13 +3,12 @@ import { BiCategory } from "react-icons/bi";
 import {
   // FiBarChart2,
   FiBox,
-  FiHome,
   FiLogOut,
   FiMenu,
   // FiSettings,
   FiShoppingBag,
   FiUsers,
-  FiX,
+  FiX
 } from 'react-icons/fi';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
@@ -19,8 +18,8 @@ function AdminLayout() {
   const location = useLocation();
 
   const menuItems = [
-    { path: '/admin', icon: FiHome, label: 'Dashboard' },
-    { path: '/admin/category', icon: BiCategory, label: 'Category' },
+    // { path: '/admin', icon: FiHome, label: 'Dashboard' },
+    { path: '/admin', icon: BiCategory, label: 'Category' },
     { path: '/admin/products', icon: FiBox, label: 'Products' },
     { path: '/admin/orders', icon: FiShoppingBag, label: 'Orders' },
     { path: '/admin/customers', icon: FiUsers, label: 'Customers' },
