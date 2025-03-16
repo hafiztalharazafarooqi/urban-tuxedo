@@ -54,7 +54,6 @@ const AddProductForm = ({ onAddProduct }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value);
     setProductData({
       ...productData,
       [name]: value,
@@ -214,7 +213,13 @@ const AddProductForm = ({ onAddProduct }) => {
         slug: category.slug,
       }));
       console.log(formattedCategory);
-
+      setProductData({
+        ...productData,
+        category:
+          (formattedCategory && formattedCategory[0])
+            ? formattedCategory[0].slug
+            : "",
+      });
       setCategoryList(formattedCategory);
     } catch (error) {
       console.warn(`Failed to fetch category: ${error.message}`);

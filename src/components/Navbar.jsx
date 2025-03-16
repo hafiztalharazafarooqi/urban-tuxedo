@@ -46,6 +46,8 @@ function Navbar() {
     const user = JSON.parse(localStorage.getItem("isLogin"));
     if (user) {
       setInitial(`${user?.user?.firstName?.charAt(0).toUpperCase()}${user?.user?.lastName?.charAt(0).toUpperCase()}`);
+    } else {
+      setInitial('')
     }
   }, [isLoggedIn]);
 

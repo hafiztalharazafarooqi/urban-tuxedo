@@ -1,4 +1,3 @@
-import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 function HeroSection() {
@@ -35,9 +34,9 @@ function HeroSection() {
           </Link> */}
         </div>
       </div>
-      <div className="absolute bottom-8 left-0 right-0 flex justify-center animate-bounce">
+      {/* <div className="absolute bottom-8 left-0 right-0 flex justify-center animate-bounce">
         <ChevronRight className="h-8 w-8 text-white transform rotate-90" />
-      </div>
+      </div> */}
     </section>
   );
 }
