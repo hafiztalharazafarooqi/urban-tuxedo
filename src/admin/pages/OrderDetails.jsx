@@ -8,6 +8,8 @@ function OrderDetail() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [updating, setUpdating] = useState(false);
+  const [userRole, setUserRole] = useState("");
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
@@ -33,6 +35,33 @@ function OrderDetail() {
     fetchOrderDetail();
   }, [orderId]);
 
+  const updateOrderStatus = async (newStatus) => {
+    if (
+      window.confirm(
+        `Are you sure you want to change the order status to ${newStatus}?`
+      )
+    ) {
+      try {
+        setUpdating(true);
+        const response = await fetch(`${BACKEND_URL}/order/${orderId}/status`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to update order status");
+        }
+        const updatedOrder = await response.json();
+        setOrder(updatedOrder.order);
+      } catch (err) {
+        console.error("Error updating status:", err);
+        alert("Failed to update status. Try again.");
+      } finally {
+        setUpdating(false);
+      }
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case "processing":
@@ -48,16 +77,26 @@ function OrderDetail() {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      const user = JSON.parse(localStorage.getItem("isLogin"));
+      if (user) {
+        const storedProfile = JSON.parse(localStorage.getItem("isLogin")).user;
+        setUserRole(storedProfile.role);
+      }
+    };
+  }, []);
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link
-            to="/admin/orders"
+            to={userRole === "admin" ? "/admin/orders" : "/profile"}
             className="text-blue-600 hover:text-blue-900 flex items-center"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Orders
+            Back to {userRole === "admin" ? "Orders" : "Profile"}
           </Link>
           <h1 className="text-3xl font-serif">Order Details</h1>
         </div>
@@ -84,7 +123,10 @@ function OrderDetail() {
                   <h2 className="text-2xl font-medium">Order #{order._id}</h2>
                   <p className="text-gray-500 mt-1">
                     Placed on{" "}
-                    {format(new Date(order.createdAt), "MMMM dd, yyyy 'at' h:mm a")}
+                    {format(
+                      new Date(order.createdAt),
+                      "MMMM dd, yyyy 'at' h:mm a"
+                    )}
                   </p>
                 </div>
                 <span
@@ -94,6 +136,30 @@ function OrderDetail() {
                 >
                   {order.status}
                 </span>
+
+                {userRole === "admin" && (
+                  <select
+                    className="ml-2 border border-gray-300 p-1 rounded"
+                    value={order.status}
+                    onChange={(e) => updateOrderStatus(e.target.value)}
+                    disabled={updating}
+                  >
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="out_for_delivery">Out for Delivery</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                )}
+                {userRole === "user" && order.status === "processing" && (
+                  <button
+                    onClick={() => updateOrderStatus("cancelled")}
+                    className="ml-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    disabled={updating}
+                  >
+                    Cancel Order
+                  </button>
+                )}
               </div>
             </div>
 
@@ -148,7 +214,9 @@ function OrderDetail() {
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-medium mb-4">Customer Information</h3>
-              <p>Name: {order.customer?.firstName} {order.customer?.lastName}</p>
+              <p>
+                Name: {order.customer?.firstName} {order.customer?.lastName}
+              </p>
               <p>Email: {order.customer?.email}</p>
               <p>Phone: {order.customer?.phone}</p>
             </div>

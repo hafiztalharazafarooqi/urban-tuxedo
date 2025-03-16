@@ -30,7 +30,7 @@ function OrderManagement() {
           customer: `${order.customer.firstName} ${order.customer.lastName}`,
           date: new Date(order.createdAt),
           total: order.totalAmount,
-          status: "Processing", // You may need to update this based on API response
+          status: order.status || "Unknown", // You may need to update this based on API response
           payment: order.paymentMethod === "cod" ? "Cash on Delivery" : "Paid",
         }));
 

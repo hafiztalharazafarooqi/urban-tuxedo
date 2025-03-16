@@ -96,11 +96,15 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="checkout-success/:orderId" element={<CheckoutSuccess />} />
+          <Route
+            path="checkout-success/:orderId"
+            element={<CheckoutSuccess />}
+          />
 
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="forget-password" element={<ForgetPassword />} />
+          <Route path="order/:orderId" element={<OrderDetail />} />
           <Route
             path="profile"
             element={
