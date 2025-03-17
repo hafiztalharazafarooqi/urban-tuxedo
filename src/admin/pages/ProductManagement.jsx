@@ -134,7 +134,7 @@ function ProductManagement() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="px-4 py-2 border rounded-md"
           />
-          <select
+          {/* <select
             className="px-4 py-2 border rounded-md"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
@@ -150,7 +150,7 @@ function ProductManagement() {
             <option value="in-stock">In Stock</option>
             <option value="low-stock">Low Stock</option>
             <option value="out-of-stock">Out of Stock</option>
-          </select>
+          </select> */}
         </div>
       </div>
 

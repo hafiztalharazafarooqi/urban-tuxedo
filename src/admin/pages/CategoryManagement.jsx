@@ -119,7 +119,7 @@ function CategoryManagement() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="px-4 py-2 border rounded-md"
           />
-          <select
+          {/* <select
             className="px-4 py-2 border rounded-md"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -127,7 +127,7 @@ function CategoryManagement() {
             <option value="">All Status</option>
             <option value="active">Active</option>
             <option value="in-active">In Active</option>
-          </select>
+          </select> */}
         </div>
       </div>
 

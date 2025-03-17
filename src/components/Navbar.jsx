@@ -56,8 +56,9 @@ function Navbar() {
       <div className="container-custom mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link to="/" className="font-serif text-2xl font-bold">
-            Urban Tuxedo
+          <Link to="/" className="font-serif text-2xl font-bold flex justify-center">
+            <img src="https://i.ibb.co/fdFm1ZRT/1-removebg-preview.png" width={40} alt="1-removebg-preview" border="0"/>
+            {/* <span>Urban Tuxedo</span> */}
           </Link>
 
           {/* Desktop Menu */}

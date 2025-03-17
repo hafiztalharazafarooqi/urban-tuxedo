@@ -14,6 +14,11 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/" replace />;
   }
 
+  // If the user is an admin and tries to access a non-admin page, redirect to /admin
+  // if (isLogin.user?.role === "admin" && !location.pathname.startsWith("/admin")) {
+  //   return <Navigate to="/admin" replace />;
+  // }
+
   return children;
 }
 
