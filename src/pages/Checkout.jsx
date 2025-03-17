@@ -52,6 +52,7 @@ function Checkout() {
         },
       },
       paymentMethod: formData.paymentMethod,
+      status: 'processing',
       items: cartItems,
       totalAmount: subtotal + shippingCost,
     };

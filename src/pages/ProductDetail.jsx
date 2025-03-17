@@ -18,7 +18,7 @@ function ProductDetail() {
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
       // Check if the product is already in the cart
       const existingIndex = cart.findIndex(
-        (item) => item.id === selctedProduct.id
+        (item) => item._id === selctedProduct._id
       );
       if (existingIndex >= 0) {
         // Update the quantity if product exists
