@@ -145,7 +145,7 @@ function Categories() {
           </div>
 
           {/* Price Range */}
-          <div>
+          {/* <div>
             <h3 className="font-serif text-lg mb-3">Price Range</h3>
             <div className="space-y-2">
               {[
@@ -167,7 +167,7 @@ function Categories() {
                 </label>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Products Grid */}
