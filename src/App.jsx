@@ -82,17 +82,17 @@ function App() {
           <Route
             path="cart"
             element={
-              <ProtectedRoute>
-                <Cart />
-              </ProtectedRoute>
+              // <ProtectedRoute>
+              <Cart />
+              // </ProtectedRoute>
             }
           />
           <Route
             path="checkout"
             element={
-              <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
+              // <ProtectedRoute>
+              <Checkout />
+              // </ProtectedRoute>
             }
           />
           <Route

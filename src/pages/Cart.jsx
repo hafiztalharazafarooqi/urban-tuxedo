@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, ChevronLeft } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  Trash2,
+  Minus,
+  Plus,
+  ShoppingBag,
+  ArrowRight,
+  ChevronLeft,
+} from "lucide-react";
 
 function Cart() {
   const [cartItems, setCartItems] = useState(() => {
     const storedCart = localStorage.getItem("cart");
-    return storedCart
-      ? JSON.parse(storedCart)
-      : []
+    return storedCart ? JSON.parse(storedCart) : [];
   });
 
   // Update localStorage whenever the cartItems state changes.
@@ -35,13 +40,16 @@ function Cart() {
 
   // Remove an item from the cart.
   const handleRemove = (id) => {
-    const updatedCart = cartItems.filter((item) => item.id !== id);
+    const updatedCart = cartItems.filter((item) => item._id !== id);
     setCartItems(updatedCart);
   };
 
   // Calculate subtotal, shipping, and total.
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const shipping = 15.00;
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+  const shipping = 15.0;
   const total = subtotal + shipping;
 
   // Empty cart state
@@ -53,9 +61,11 @@ function Cart() {
             <ShoppingBag className="h-12 w-12 text-gray-400" />
           </div>
           <h1 className="text-3xl font-bold mb-4">Your Cart is Empty</h1>
-          <p className="text-gray-600 mb-8">Looks like you haven&apos;t added any items to your cart yet.</p>
-          <Link 
-            to="/Category" 
+          <p className="text-gray-600 mb-8">
+            Looks like you haven&apos;t added any items to your cart yet.
+          </p>
+          <Link
+            to="/Category"
             className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
             Continue Shopping
@@ -69,19 +79,24 @@ function Cart() {
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto py-16 px-6">
         <div className="flex items-center mb-8">
-          <Link to="/Category" className="text-gray-600 hover:text-red-500 flex items-center gap-1 transition">
+          <Link
+            to="/Category"
+            className="text-gray-600 hover:text-red-500 flex items-center gap-1 transition"
+          >
             <ChevronLeft className="h-4 w-4" />
             <span>Continue Shopping</span>
           </Link>
-          <h1 className="text-3xl font-bold text-center flex-1">Your Shopping Cart</h1>
+          <h1 className="text-3xl font-bold text-center flex-1">
+            Your Shopping Cart
+          </h1>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-6">
             {cartItems.map((item) => (
-              <div 
-                key={item.id} 
+              <div
+                key={item._id}
                 className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden group"
               >
                 <div className="flex gap-6">
@@ -97,14 +112,17 @@ function Cart() {
                       <h3 className="text-lg font-medium">{item.title}</h3>
                       <button
                         className="text-gray-400 hover:text-red-500 transition"
-                        onClick={() => handleRemove(item.id)}
+                        onClick={() => handleRemove(item._id)}
                         aria-label="Remove item"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
                     </div>
-                    <p className="text-red-500 font-medium mt-1">£{item.price}</p>
-                    
+                    <p className="font-medium mt-1">
+                      <span className="text-red-500 ">£{item.price}</span>
+                      {item.selectedSize ? <span className="ml-3">size: {item.selectedSize}</span> : ''}
+                    </p>
+
                     <div className="flex items-center gap-4 mt-4">
                       <div className="flex items-center border border-gray-200 rounded-full overflow-hidden">
                         <button
@@ -114,7 +132,9 @@ function Cart() {
                         >
                           <Minus className="h-4 w-4" />
                         </button>
-                        <span className="px-4 font-medium">{item.quantity}</span>
+                        <span className="px-4 font-medium">
+                          {item.quantity}
+                        </span>
                         <button
                           className="p-2 hover:bg-gray-100 transition"
                           onClick={() => handleIncrement(item.id)}
@@ -139,7 +159,11 @@ function Cart() {
               <h2 className="text-xl font-bold mb-6">Order Summary</h2>
               <div className="space-y-4">
                 <div className="flex justify-between text-gray-600">
-                  <span>Subtotal ({cartItems.reduce((acc, item) => acc + item.quantity, 0)} items)</span>
+                  <span>
+                    Subtotal (
+                    {cartItems.reduce((acc, item) => acc + item.quantity, 0)}{" "}
+                    items)
+                  </span>
                   <span>£{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
@@ -153,16 +177,16 @@ function Cart() {
                   </div>
                   <p className="text-gray-500 text-sm mt-1">Including VAT</p>
                 </div>
-                
-                <Link 
-                  to="/checkout" 
+
+                <Link
+                  to="/checkout"
                   className="w-full mt-6 px-6 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
                 >
                   <span>Proceed to Checkout</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                
-                <div className="mt-6 space-y-4">
+
+                {/* <div className="mt-6 space-y-4">
                   <h3 className="font-medium text-gray-900">We Accept</h3>
                   <div className="flex gap-2">
                     <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
@@ -178,7 +202,7 @@ function Cart() {
                       <span className="text-xs font-medium">PayPal</span>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

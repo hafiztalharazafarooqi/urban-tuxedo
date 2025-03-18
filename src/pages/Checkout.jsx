@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 function Checkout() {
   const [formData, setFormData] = useState({
@@ -52,7 +53,7 @@ function Checkout() {
         },
       },
       paymentMethod: formData.paymentMethod,
-      status: 'processing',
+      status: "processing",
       items: cartItems,
       totalAmount: subtotal + shippingCost,
     };
@@ -92,7 +93,10 @@ function Checkout() {
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Contact Information */}
             <div>
-              <h2 className="font-serif text-xl mb-4">Contact Information</h2>
+              <div className="flex justify-between">
+                <h2 className="font-serif text-xl mb-4">Contact Information</h2>
+                <Link to={'/login'} className="font-serif text-xl mb-4 hover:text-red-600 hover:font-bold hover:text-ellipsis">Login</Link>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"

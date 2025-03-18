@@ -13,6 +13,7 @@ function Categories() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [categoryList, setCategoryList] = useState([]);
+  const [currentCategoryData, setCurrentCategoryData] = useState(null);
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
@@ -29,7 +30,6 @@ function Categories() {
     } catch (error) {
       console.warn(`Fetching products failed: ${error.message}`);
       setError("No products found.");
-
       setLoading(false);
     }
   };
@@ -47,6 +47,7 @@ function Categories() {
           id: category._id, // _id is already a string in actual API response
           name: category.name,
           slug: category.slug,
+          comingSoon: category.comingSoon || false, // Handle the comingSoon property
         })),
       ];
       console.log(formattedCategory);
@@ -67,6 +68,10 @@ function Categories() {
         item?.category?.includes(selectedCategory)
       );
     }
+
+    // Update current category data
+    const currentCategory = categoryList.find(cat => cat.slug === selectedCategory);
+    setCurrentCategoryData(currentCategory);
 
     // Filter by price range
     if (priceRange !== "all") {
@@ -89,7 +94,7 @@ function Categories() {
     }
 
     setFilteredProducts(filtered);
-  }, [products, selectedCategory, priceRange, sortBy]);
+  }, [products, selectedCategory, priceRange, sortBy, categoryList]);
 
   useEffect(() => {
     if (category) {
@@ -102,6 +107,15 @@ function Categories() {
   useEffect(() => {
     applyFilters();
   }, [applyFilters]);
+
+  // Function to check if we should display "Coming Soon"
+  const shouldShowComingSoon = () => {
+    return (
+      currentCategoryData &&
+      currentCategoryData.comingSoon === true &&
+      filteredProducts.length === 0
+    );
+  };
 
   return (
     <div className="container-custom py-8">
@@ -186,7 +200,7 @@ function Categories() {
             </select>
           </div>
 
-          {/* Products */}
+          {/* Products or Coming Soon message */}
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[1, 2, 3].map((i) => (
@@ -198,8 +212,16 @@ function Categories() {
                 </div>
               ))}
             </div>
+          ) : shouldShowComingSoon() ? (
+            <div className="flex flex-col items-center justify-center w-full py-16">
+              <h2 className="text-3xl font-serif text-center mb-4">Coming Soon</h2>
+              <p className="text-gray-600 text-center max-w-md">
+                We're working on adding products to this category. 
+                Please check back later or explore our other collections.
+              </p>
+            </div>
           ) : filteredProducts.length === 0 ? (
-            <p className="text-red-500 text-center w-full">{error}</p>
+            <p className="text-red-500 text-center w-full">{error || "No products found in this category."}</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {filteredProducts.map((item) => (
@@ -208,7 +230,7 @@ function Categories() {
                   to={`/product/${item._id}`}
                   className="group"
                 >
-                  <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                  <div className="bg-white shadow-lg rounded-lg overflow-hidden h-full">
                     <div className="relative overflow-hidden">
                       <img
                         src={item.images.primary}
@@ -217,7 +239,7 @@ function Categories() {
                       />
                     </div>
                     <div className="p-4">
-                      <h3 className="font-serif text-lg mb-2">{item.title}</h3>
+                      <h3 className="font-serif text-lg mb-2 truncate">{item.title}</h3>
                       <p className="text-gray-600 mb-2">£{item.price}</p>
                       <button className="btn btn-primary w-full">
                         View Details

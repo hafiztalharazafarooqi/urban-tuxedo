@@ -15,6 +15,8 @@ function Register() {
   });
 
   const [message, setMessage] = useState("");
+  const [loader, setLoader] = useState(false);
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -27,15 +29,18 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoader(true);
 
     // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
       setMessage("Passwords do not match.");
+      setLoader(false);
       return;
     }
 
     // Ensure terms are agreed to
     if (!formData.terms) {
+      setLoader(false);
       setMessage("You must agree to the Terms and Conditions.");
       return;
     }
@@ -69,17 +74,17 @@ function Register() {
         );
       } else {
         const data = await response.json();
-        window.dispatchEvent(new Event("storage")); // Notify other components
-        setMessage("Registration successful!");
-        console.log("Registration success:", data);
         toast.success("Login successful!");
         localStorage.setItem("isLogin", JSON.stringify(data));
-
         setTimeout(() => {
-          navigate("/");
+          localStorage.removeItem("redirectAfterLogin"); // Clear after use
+          window.dispatchEvent(new Event("storage")); // Notify other components
+          setLoader(false);
+          navigate('/');
         }, 2000);
       }
     } catch (error) {
+      setLoader(false);
       setMessage(`Registration failed: ${error.message}`);
     }
   };
@@ -93,6 +98,9 @@ function Register() {
             Join Urban Tuxedo for exclusive offers
           </p>
         </div>
+        {message && (
+            <p className="text-center text-md mt-4 text-red-600 bg-red-100 rounded">{message}</p>
+          )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -206,7 +214,7 @@ function Register() {
             type="submit"
             className="w-full px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
-            Create Account
+            {loader ? 'Createing Account...' : 'Create Account'}
           </button>
 
           <p className="text-center text-sm">
@@ -215,9 +223,7 @@ function Register() {
               Sign in
             </Link>
           </p>
-          {message && (
-            <p className="text-center text-sm mt-4 text-red-600">{message}</p>
-          )}
+          
         </form>
       </div>
     </div>

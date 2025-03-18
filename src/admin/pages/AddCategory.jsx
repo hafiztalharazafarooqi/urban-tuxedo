@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { FiUpload, FiX } from "react-icons/fi";
 
 const uploadImage = async (file) => {
@@ -34,19 +34,27 @@ const AddCategoryForm = ({ onAddCategory }) => {
     description: "",
     image: null,
     isActive: true,
-    parentCategory: null,
+    parentCategory: "",
+    comingSoon: false,
   });
 
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categoryList, setCategoryList] = useState([]);
+
   const imageFileInputRef = useRef(null);
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    
+    // Handle checkbox inputs differently than text inputs
+    const newValue = type === 'checkbox' ? checked : value;
+    
     setCategoryData({
       ...categoryData,
-      [name]: value,
+      [name]: newValue,
+      // Only generate slug when name changes and it's not a checkbox
       slug: name === "name" ? generateSlug(value) : categoryData.slug,
     });
   };
@@ -85,8 +93,9 @@ const AddCategoryForm = ({ onAddCategory }) => {
         slug: categoryData.slug,
         description: categoryData.description,
         image: imageUrl,
-        isActive: true,
-        parentCategory: null,
+        isActive: categoryData.isActive,
+        parentCategory: categoryData.parentCategory || null,
+        comingSoon: categoryData.comingSoon,
         createdAt: new Date().toISOString(),
       };
 
@@ -110,6 +119,27 @@ const AddCategoryForm = ({ onAddCategory }) => {
       alert("Failed to add category. Please try again.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  useEffect(() => {
+    getCategory();
+  }, []);
+
+  const getCategory = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/category`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await response.json();
+      const formattedCategory = data.category.map((category) => ({
+        id: category._id, // _id is already a string in actual API response
+        name: category.name,
+        slug: category.slug,
+      }));
+      setCategoryList(formattedCategory);
+    } catch (error) {
+      console.warn(`Failed to fetch category: ${error.message}`);
     }
   };
 
@@ -157,6 +187,27 @@ const AddCategoryForm = ({ onAddCategory }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Parent Category
+                </label>
+                <select
+                  name="parentCategory"
+                  value={categoryData.parentCategory}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-md"
+                >
+                  <option value="">None</option>
+                  {categoryList.map((category) => (
+                    <option key={category._id} value={category._id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-sm text-gray-500 mt-1">
+                  Select a parent category to create a subcategory
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description*
                 </label>
                 <textarea
@@ -167,6 +218,19 @@ const AddCategoryForm = ({ onAddCategory }) => {
                   className="w-full px-4 py-2 border rounded-md"
                   required
                 ></textarea>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="comingSoon"
+                  name="comingSoon"
+                  checked={categoryData.comingSoon}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-red-500 focus:ring-red-400 border-gray-300 rounded"
+                />
+                <label htmlFor="comingSoon" className="text-sm font-medium text-gray-700">
+                  Mark as &quot;Coming Soon&quot;
+                </label>
               </div>
             </div>
             <div>
@@ -205,10 +269,36 @@ const AddCategoryForm = ({ onAddCategory }) => {
                   )}
                 </button>
               </div>
+              
+              {categoryData.parentCategory && (
+                <div className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+                  <p className="text-sm text-gray-600">
+                    This will be created as a subcategory under &quot;{categoryData.parentCategory}&quot;
+                    <strong>
+                      {categoryList.find(cat => cat._id === categoryData.parentCategory)?.name || ""}
+                    </strong>
+                  </p>
+                </div>
+              )}
+              
+              {categoryData.comingSoon && (
+                <div className="mt-4 p-3 bg-yellow-50 rounded-md border border-yellow-200">
+                  <p className="text-sm text-yellow-700">
+                    This category will be marked as &quot;Coming Soon&quot;.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="flex justify-end gap-4 mt-6">
+            <button
+              type="button"
+              onClick={() => onAddCategory(false)}
+              className="px-8 py-3 bg-gray-200 text-gray-800 font-medium rounded-full hover:bg-gray-300 transition"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"

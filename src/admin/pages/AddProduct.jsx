@@ -164,7 +164,7 @@ const AddProductForm = ({ onAddProduct }) => {
       const formattedData = {
         ...productData,
         price: parseFloat(productData.price),
-        isFeatured: false,
+        isFeatured: true,
         defaultQuantity: parseInt(productData.defaultQuantity) || 1,
         __v: 0,
         images: {
@@ -327,6 +327,19 @@ const AddProductForm = ({ onAddProduct }) => {
                   className="w-full px-4 py-2 border rounded-md"
                   required
                 ></textarea>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="isFeatured"
+                  name="isFeatured"
+                  checked={productData.isFeatured}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-red-500 focus:ring-red-400 border-gray-300 rounded"
+                />
+                <label htmlFor="isFeatured" className="text-sm font-medium text-gray-700">
+                  Mark as &quot;Featured Product&quot;
+                </label>
               </div>
             </div>
 

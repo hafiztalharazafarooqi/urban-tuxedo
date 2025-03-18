@@ -1,45 +1,63 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 function ProductDetail() {
   const { id } = useParams();
-  const isUserLoggedIn = !!localStorage.getItem("isLogin"); // Example: Check if token exists
   const navigate = useNavigate();
+  const imageRef = useRef(null);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [isZooming, setIsZooming] = useState(false);
 
   // const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [selctedProduct, setSelctedProduct] = useState({});
+  const [selectedProduct, setSelectedProduct] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const handleAddToCart = () => {
-    if (isUserLoggedIn) {
-      // Get the current cart from localStorage (or use an empty array)
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      // Check if the product is already in the cart
-      const existingIndex = cart.findIndex(
-        (item) => item._id === selctedProduct._id
-      );
-      if (existingIndex >= 0) {
-        // Update the quantity if product exists
-        cart[existingIndex].quantity += quantity;
-      } else {
-        // Add product with the current quantity
-        cart.push({ ...selctedProduct, quantity });
-      }
-      // Save the updated cart back to localStorage
-      localStorage.setItem("cart", JSON.stringify(cart));
-      // alert("Product added to cart!");
+    // Get the current cart from localStorage (or use an empty array)
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    // Check if the product is already in the cart
+    const existingIndex = cart.findIndex(
+      (item) => item._id === selectedProduct._id
+    );
+    if (
+      existingIndex >= 0 &&
+      cart[existingIndex]?.selectedSize === selectedSize
+    ) {
+      // Update the quantity if product exists
+      cart[existingIndex].quantity += quantity;
     } else {
-      localStorage.setItem("redirectAfterLogin", `/product/${id}`);
-      navigate("/login");
+      // Add product with the current quantity
+      cart.push({ ...selectedProduct, quantity, selectedSize });
     }
+    // Save the updated cart back to localStorage
+    localStorage.setItem("cart", JSON.stringify(cart));
+    // alert("Product added to cart!");
+  };
+
+  const handleBuyNow = () => {
+    setTimeout(() => {
+      localStorage.setItem(
+        "cart",
+        JSON.stringify([{ ...selectedProduct, quantity }])
+      );
+      navigate("/cart");
+    }, 1000);
   };
 
   useEffect(() => {
     // Find the product with the matching id
     getSelectedProducts();
   }, [id]);
+
+  useEffect(() => {
+    if (selectedProduct?.images?.primary) {
+      setSelectedImage(selectedProduct.images.primary);
+    }
+  }, [selectedProduct]);
 
   const getSelectedProducts = async () => {
     try {
@@ -50,12 +68,26 @@ function ProductDetail() {
         headers: { "Content-Type": "application/json" },
       });
       const data = await response.json();
-      setSelctedProduct(data.product);
+      setSelectedProduct(data.product);
       setLoading(false);
     } catch (error) {
       console.warn(`Login failed: ${error.message}`);
       setError("Failed to load product. Please try again later.");
     }
+  };
+
+  const handleMouseMove = (e) => {
+    if (imageRef.current) {
+      const { left, top, width, height } =
+        imageRef.current.getBoundingClientRect();
+      const x = ((e.clientX - left) / width) * 100;
+      const y = ((e.clientY - top) / height) * 100;
+      setZoomPosition({ x, y });
+    }
+  };
+
+  const handleImageClick = (img) => {
+    setSelectedImage(img);
   };
 
   return (
@@ -88,27 +120,48 @@ function ProductDetail() {
             </div>
           </div>
         </div>
-      ) : !selctedProduct ? (
+      ) : !selectedProduct ? (
         <p className="text-red-500 text-center w-full">{error}</p>
       ) : (
         <div className="container-custom py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Product Images */}
             <div className="space-y-4">
-              <div className="aspect-w-3 aspect-h-4">
+              <div
+                className="aspect-w-3 aspect-h-4 relative overflow-hidden rounded-lg cursor-zoom-in"
+                onMouseEnter={() => setIsZooming(true)}
+                onMouseLeave={() => setIsZooming(false)}
+                onMouseMove={handleMouseMove}
+                ref={imageRef}
+              >
                 <img
-                  src={selctedProduct?.images?.primary}
+                  src={selectedImage || selectedProduct?.images?.primary}
                   alt="Product"
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-cover rounded-lg transition-transform duration-200"
                 />
+                {isZooming && (
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <img
+                      src={selectedImage || selectedProduct?.images?.primary}
+                      alt="Product zoom"
+                      className="absolute w-full h-full object-cover scale-150 transition-transform duration-200"
+                      style={{
+                        transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                      }}
+                    />
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-4 gap-4">
-                {selctedProduct?.images?.gallery.map((img, index) => (
+                {selectedProduct?.images?.gallery.map((img, index) => (
                   <img
                     key={index}
                     src={img}
                     alt={`Product view ${index}`}
-                    className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-75"
+                    className={`w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-75 transition-all duration-200 ${
+                      selectedImage === img ? "ring-2 ring-red-600" : ""
+                    }`}
+                    onClick={() => handleImageClick(img)}
                   />
                 ))}
               </div>
@@ -117,37 +170,44 @@ function ProductDetail() {
             {/* Product Info */}
             <div>
               <h1 className="text-3xl font-serif mb-4">
-                {selctedProduct?.title}
+                {selectedProduct?.title}
               </h1>
               <p className="text-2xl text-red-600 mb-6">
-                £{selctedProduct?.price}
+                £{selectedProduct?.price}
               </p>
 
               <div className="space-y-6">
                 <div>
                   <h3 className="font-serif text-lg mb-2">Description</h3>
-                  <p className="text-gray-600">{selctedProduct?.description}</p>
+                  <p className="text-gray-600">
+                    {selectedProduct?.description}
+                  </p>
                 </div>
 
                 {/* Size Selection */}
-                {/* <div>
-                  <h3 className="font-serif text-lg mb-2">Select Size</h3>
-                  <div className="flex gap-4">
-                    {["38R", "40R", "42R", "44R", "46R"].map((size) => (
-                      <button
-                        key={size}
-                        className={`px-4 py-2 border rounded-md ${
-                          selectedSize === size
-                            ? "border-red-600 bg-red-600 text-white"
-                            : "border-gray-300 hover:border-red-600"
-                        }`}
-                        onClick={() => setSelectedSize(size)}
-                      >
-                        {size}
-                      </button>
-                    ))}
+                {selectedProduct.availableSizes &&
+                selectedProduct.availableSizes.length > 0 ? (
+                  <div>
+                    <h3 className="font-serif text-lg mb-2">Select Size</h3>
+                    <div className="flex gap-4">
+                      {selectedProduct.availableSizes.map((size) => (
+                        <button
+                          key={size}
+                          className={`px-4 py-2 border rounded-md ${
+                            selectedSize === size
+                              ? "border-red-600 bg-red-600 text-white"
+                              : "border-gray-300 hover:border-red-600"
+                          }`}
+                          onClick={() => setSelectedSize(size)}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div> */}
+                ) : (
+                  ""
+                )}
 
                 {/* Quantity */}
                 <div>
@@ -177,12 +237,12 @@ function ProductDetail() {
                   >
                     Add to Cart
                   </button>
-                  {/* <button
-                    className="btn btn-primary w-full py-3"
+                  <button
+                    className="btn btn-primary w-full py-3 rounded-full transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                     onClick={handleBuyNow}
                   >
                     Buy Now
-                  </button> */}
+                  </button>
                 </div>
               </div>
             </div>
