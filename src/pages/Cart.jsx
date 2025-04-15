@@ -120,7 +120,13 @@ function Cart() {
                     </div>
                     <p className="font-medium mt-1">
                       <span className="text-red-500 ">£{item.price}</span>
-                      {item.selectedSize ? <span className="ml-3">size: {item.selectedSize}</span> : ''}
+                      {item.selectedSize ? (
+                        <span className="ml-3">
+                          size: {item.selectedSize.size} <small className="font-light">(Only {item.selectedSize.quantity} items are available in stock)</small>
+                        </span>
+                      ) : (
+                        ""
+                      )}
                     </p>
 
                     <div className="flex items-center gap-4 mt-4">
@@ -137,7 +143,12 @@ function Cart() {
                         </span>
                         <button
                           className="p-2 hover:bg-gray-100 transition"
-                          onClick={() => handleIncrement(item.id)}
+                          onClick={() => {
+                            if (item.quantity < item.selectedSize.size) {
+                              () => handleIncrement(item.id);
+                            }
+                          }}
+                          disabled={item.quantity >= item.selectedSize.size}
                           aria-label="Increase quantity"
                         >
                           <Plus className="h-4 w-4" />

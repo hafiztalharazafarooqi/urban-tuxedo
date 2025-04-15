@@ -96,7 +96,7 @@ function App() {
             }
           />
           <Route
-            path="checkout-success/:orderId"
+            path="checkout-success"
             element={<CheckoutSuccess />}
           />
 

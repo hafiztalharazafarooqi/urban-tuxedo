@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FiPlus, FiTrash2, FiXSquare } from "react-icons/fi";
+import { FiEdit2, FiPlus, FiTrash2, FiXSquare } from "react-icons/fi";
 import AddProductForm from "./AddProduct";
 
 function ProductManagement() {
@@ -10,8 +10,9 @@ function ProductManagement() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  // const [categoryFilter, setCategoryFilter] = useState("");
+  // const [statusFilter, setStatusFilter] = useState("");
+  const [selectedProductID, setSelectedProductId] = useState("");
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
   // Fetch products from API
@@ -70,7 +71,7 @@ function ProductManagement() {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
         const response = await fetch(
-          `https://urban-tuxedo-backend.vercel.app/api/products/${productId}`,
+          `${BACKEND_URL}/products/${productId}`,
           {
             method: "DELETE",
           }
@@ -91,23 +92,30 @@ function ProductManagement() {
     }
   };
 
-  const handleAddProduct = (e) => {
-    console.log(e);
+  const handleAddProduct = () => {
     setShowAddModal(false);
+    setSelectedProductId("");
     // After successful addition, fetch products again
     fetchProducts();
+  };
+
+  const handleEditProduct = (e) => {
+    console.log(e);
+    setSelectedProductId(e.id);
+    setShowAddModal(true);
   };
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      !categoryFilter || product.category === categoryFilter;
-    const matchesStatus =
-      !statusFilter ||
-      product.status.toLowerCase().includes(statusFilter.toLowerCase());
-    return matchesSearch && matchesCategory && matchesStatus;
+    // const matchesCategory =
+    //   !categoryFilter || product.category === categoryFilter;
+    // const matchesStatus =
+    //   !statusFilter ||
+    //   product.status.toLowerCase().includes(statusFilter.toLowerCase());
+    return matchesSearch;
+    // return matchesSearch && matchesCategory && matchesStatus;
   });
 
   return (
@@ -243,11 +251,19 @@ function ProductManagement() {
                             <div className="text-sm font-medium text-gray-900">
                               {product.name}
                             </div>
-                            {product.sizes && product.sizes.length > 0 && (
+                            {/* {Array.isArray(product.sizes) && product.sizes.length > 0 && (
                               <div className="text-xs text-gray-500">
-                                Sizes: {product.sizes.join(", ")}
+                                Sizes: {product.sizes.length}
+                                {product.sizes.map(size => (
+                                  <span
+                                    key={size}
+                                    className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full mx-1"
+                                  >
+                                    {size}
+                                  </span>
+                                ))}
                               </div>
-                            )}
+                            )} */}
                           </div>
                         </div>
                       </td>
@@ -279,12 +295,12 @@ function ProductManagement() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
-                          {/* <button
+                          <button
                             className="text-blue-600 hover:text-blue-900"
                             onClick={() => handleEditProduct(product)}
                           >
                             <FiEdit2 />
-                          </button> */}
+                          </button>
                           <button
                             className="text-red-600 hover:text-red-900"
                             onClick={() => handleDeleteProduct(product.id)}
@@ -313,7 +329,10 @@ function ProductManagement() {
 
       {/* Add Product Modal */}
       {showAddModal && (
-        <AddProductForm onAddProduct={() => handleAddProduct(event)} />
+        <AddProductForm
+          productID={selectedProductID}
+          onAddProduct={() => handleAddProduct(event)}
+        />
       )}
     </div>
   );

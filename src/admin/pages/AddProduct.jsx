@@ -27,7 +27,7 @@ const uploadImage = async (file) => {
   }
 };
 
-const AddProductForm = ({ onAddProduct }) => {
+const AddProductForm = ({ onAddProduct, productID }) => {
   const [productData, setProductData] = useState({
     title: "",
     price: "",
@@ -38,10 +38,12 @@ const AddProductForm = ({ onAddProduct }) => {
       gallery: [],
     },
     availableSizes: [],
-    defaultQuantity: 1,
+    defaultQuantity: 0,
+    isFeatured: false,
   });
 
   const [sizeInput, setSizeInput] = useState("");
+  const [sizeQuantityInput, setSizeQuantityInput] = useState(1);
   const [primaryImagePreview, setPrimaryImagePreview] = useState(null);
   const [galleryPreviews, setGalleryPreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,29 +55,43 @@ const AddProductForm = ({ onAddProduct }) => {
   const galleryFileInputRef = useRef(null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProductData({
-      ...productData,
-      [name]: value,
-    });
+    const { name, value, type, checked } = e.target;
+    setProductData((prevData) => ({
+      ...prevData,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleAddSize = () => {
-    if (sizeInput.trim()) {
-      setProductData({
-        ...productData,
-        availableSizes: [...productData.availableSizes, sizeInput.trim()],
-      });
+    if (sizeInput.trim() && sizeQuantityInput > 0) {
+      // const size = `${sizeInput.trim()} - (${sizeQuantityInput})`; // e.g. 38R (5)
+      const sizes = {
+        size: sizeInput.trim(),
+        quantity: sizeQuantityInput,
+      };      
+      setProductData((prevData) => ({
+        ...prevData,
+        availableSizes: [...prevData.availableSizes, sizes],
+      }));
       setSizeInput("");
+      setSizeQuantityInput(1);
     }
+    productData.defaultQuantity = productData.defaultQuantity + Number(sizeQuantityInput);
   };
 
   const handleRemoveSize = (index) => {
-    const updatedSizes = [...productData.availableSizes];
-    updatedSizes.splice(index, 1);
-    setProductData({
-      ...productData,
-      availableSizes: updatedSizes,
+    const selectedSize = productData.availableSizes[index];
+   
+    productData.defaultQuantity = productData.defaultQuantity - Number(selectedSize.quantity);
+    
+    setProductData((prevData) => {
+      const updatedSizes = [...prevData.availableSizes];
+      // Remove the size from the array
+      updatedSizes.splice(index, 1);
+      return {
+        ...prevData,
+        availableSizes: updatedSizes,
+      };
     });
   };
 
@@ -91,13 +107,13 @@ const AddProductForm = ({ onAddProduct }) => {
     reader.readAsDataURL(file);
 
     // Store the file in state
-    setProductData({
-      ...productData,
+    setProductData((prevData) => ({
+      ...prevData,
       images: {
-        ...productData.images,
+        ...prevData.images,
         primary: file,
       },
-    });
+    }));
   };
 
   const handleGalleryImagesChange = (e) => {
@@ -121,29 +137,31 @@ const AddProductForm = ({ onAddProduct }) => {
     });
 
     // Store the files in state
-    setProductData({
-      ...productData,
+    setProductData((prevData) => ({
+      ...prevData,
       images: {
-        ...productData.images,
-        gallery: [...productData.images.gallery, ...files],
+        ...prevData.images,
+        gallery: [...prevData.images.gallery, ...files],
       },
-    });
+    }));
   };
 
   const removeGalleryImage = (index) => {
-    const updatedGallery = [...productData.images.gallery];
-    updatedGallery.splice(index, 1);
+    setProductData((prevData) => {
+      const updatedGallery = [...prevData.images.gallery];
+      updatedGallery.splice(index, 1);
+
+      return {
+        ...prevData,
+        images: {
+          ...prevData.images,
+          gallery: updatedGallery,
+        },
+      };
+    });
 
     const updatedPreviews = [...galleryPreviews];
     updatedPreviews.splice(index, 1);
-
-    setProductData({
-      ...productData,
-      images: {
-        ...productData.images,
-        gallery: updatedGallery,
-      },
-    });
     setGalleryPreviews(updatedPreviews);
   };
 
@@ -152,53 +170,79 @@ const AddProductForm = ({ onAddProduct }) => {
     setIsSubmitting(true);
 
     try {
-      // Upload primary image
-      const primaryImageUrl = await uploadImage(productData.images.primary);
+      // Upload primary image if it's a file
+      const primaryImageUrl =
+        productData.images.primary instanceof File
+          ? await uploadImage(productData.images.primary)
+          : productData.images.primary;
 
-      // Upload gallery images
+      // Upload gallery images that are files
       const galleryImageUrls = await Promise.all(
-        productData.images.gallery.map((file) => uploadImage(file))
+        productData.images.gallery.map((file) =>
+          file instanceof File ? uploadImage(file) : file
+        )
       );
 
       // Format data for API
       const formattedData = {
         ...productData,
         price: parseFloat(productData.price),
-        isFeatured: true,
         defaultQuantity: parseInt(productData.defaultQuantity) || 1,
-        __v: 0,
         images: {
           primary: primaryImageUrl,
           gallery: galleryImageUrls,
         },
       };
 
+      // Determine if this is an update or create operation
+      const isUpdateOperation = !!productID;
+      const url = isUpdateOperation
+        ? `${BACKEND_URL}/products/${productID}`
+        : `${BACKEND_URL}/products/`;
+
+      const method = isUpdateOperation ? "PUT" : "POST";
+
       // Send data to API
-      const response = await fetch(`${BACKEND_URL}/products/`, {
-        method: "POST",
+      const response = await fetch(url, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
+          accept: "application/json",
         },
         body: JSON.stringify(formattedData),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add product");
+        throw new Error(
+          `Failed to ${isUpdateOperation ? "update" : "add"} product`
+        );
       }
 
       const data = await response.json();
       onAddProduct(data); // Notify parent component
-      alert("Product added successfully!");
+      alert(`Product ${isUpdateOperation ? "updated" : "added"} successfully!`);
     } catch (error) {
-      console.error("Error adding product:", error);
-      alert("Failed to add product. Please try again.");
+      console.error(
+        `Error ${productID ? "updating" : "adding"} product:`,
+        error
+      );
+      alert(
+        `Failed to ${productID ? "update" : "add"} product. Please try again.`
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
+
   useEffect(() => {
     getCategory();
   }, []);
+
+  useEffect(() => {
+    if (productID) {
+      getProductById(productID);
+    }
+  }, [productID]);
 
   const getCategory = async () => {
     try {
@@ -208,21 +252,50 @@ const AddProductForm = ({ onAddProduct }) => {
       });
       const data = await response.json();
       const formattedCategory = data.category.map((category) => ({
-        id: category._id, // _id is already a string in actual API response
+        id: category._id,
         name: category.name,
         slug: category.slug,
       }));
-      console.log(formattedCategory);
-      setProductData({
-        ...productData,
-        category:
-          (formattedCategory && formattedCategory[0])
-            ? formattedCategory[0].slug
-            : "",
-      });
+      if (!productID) {
+        setProductData((prevData) => ({
+          ...prevData,
+          category:
+            formattedCategory && formattedCategory[0]
+              ? formattedCategory[0].slug
+              : "",
+        }));
+      }
       setCategoryList(formattedCategory);
     } catch (error) {
       console.warn(`Failed to fetch category: ${error.message}`);
+    }
+  };
+
+  const getProductById = async (id) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/products/${id}`);
+      if (!response.ok) throw new Error("Failed to fetch product data");
+
+      const data = await response.json();
+      setProductData((prevData) => ({
+        ...prevData,
+        title: data.product.title || "",
+        price: data.product.price ? data.product.price.toString() : "",
+        description: data.product.description || "",
+        category: data.product.category || "",
+        images: {
+          primary: data.product.images?.primary || null,
+          gallery: data.product.images?.gallery || [],
+        },
+        availableSizes: data.product.availableSizes || [],
+        defaultQuantity: data.product.defaultQuantity || 1,
+        isFeatured: data.product.isFeatured || false,
+      }));
+
+      setPrimaryImagePreview(data.product.images?.primary || null);
+      setGalleryPreviews(data.product.images?.gallery || []);
+    } catch (error) {
+      console.error("Error fetching product data:", error);
     }
   };
 
@@ -310,8 +383,9 @@ const AddProductForm = ({ onAddProduct }) => {
                   name="defaultQuantity"
                   value={productData.defaultQuantity}
                   onChange={handleChange}
-                  min="1"
+                  min="0"
                   className="w-full px-4 py-2 border rounded-md"
+                  disabled
                 />
               </div>
 
@@ -337,7 +411,10 @@ const AddProductForm = ({ onAddProduct }) => {
                   onChange={handleChange}
                   className="h-4 w-4 text-red-500 focus:ring-red-400 border-gray-300 rounded"
                 />
-                <label htmlFor="isFeatured" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="isFeatured"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Mark as &quot;Featured Product&quot;
                 </label>
               </div>
@@ -357,6 +434,13 @@ const AddProductForm = ({ onAddProduct }) => {
                     className="w-full px-4 py-2 border rounded-md"
                     placeholder="e.g. 38R, 40R"
                   />
+                  <input
+                    type="number"
+                    value={sizeQuantityInput}
+                    onChange={(e) => setSizeQuantityInput(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-md"
+                    min="1"
+                  />
                   <button
                     type="button"
                     onClick={handleAddSize}
@@ -367,12 +451,12 @@ const AddProductForm = ({ onAddProduct }) => {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {productData.availableSizes.map((size, index) => (
+                  {productData?.availableSizes?.map((size, index) => (
                     <div
                       key={index}
                       className="bg-gray-200 rounded-full px-3 py-1 flex items-center gap-1"
                     >
-                      <span>{size}</span>
+                      <span>{size?.size}</span> -<span>({size?.quantity})</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveSize(index)}
@@ -492,6 +576,7 @@ const AddProductForm = ({ onAddProduct }) => {
 
 AddProductForm.propTypes = {
   onAddProduct: PropTypes.func.isRequired,
+  productID: PropTypes.string.isRequired,
 };
 
 export default AddProductForm;

@@ -6,7 +6,6 @@ function Categories() {
   const { category } = useParams();
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [priceRange, setPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -14,6 +13,7 @@ function Categories() {
   const [error, setError] = useState(null);
   const [categoryList, setCategoryList] = useState([]);
   const [currentCategoryData, setCurrentCategoryData] = useState(null);
+  const [categoryTree, setCategoryTree] = useState([]);
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
@@ -41,27 +41,66 @@ function Categories() {
         headers: { "Content-Type": "application/json" },
       });
       const data = await response.json();
+
+      // Create a flat list of all categories with proper mappings
       const formattedCategory = [
-        { id: 1, name: "All", slug: "all" }, // Ensure this is the first item
+        { id: "all", name: "All", slug: "all" }, // Ensure this is the first item
         ...data.category.map((category) => ({
-          id: category._id, // _id is already a string in actual API response
+          id: category._id,
           name: category.name,
           slug: category.slug,
-          comingSoon: category.comingSoon || false, // Handle the comingSoon property
+          parentCategory: category.parentCategory,
+          comingSoon: category.comingSoon || false,
         })),
       ];
-      console.log(formattedCategory);
 
       setCategoryList(formattedCategory);
+
+      // Create tree structure
+      const buildCategoryTree = () => {
+        // Find root level categories (those with no parent or parent is null)
+        const rootCategories = [
+          { id: "all", name: "All", slug: "all" }, // Always include "All" at the root
+          ...data.category
+            .filter((cat) => !cat.parentCategory)
+            .map((cat) => ({
+              id: cat._id,
+              name: cat.name,
+              slug: cat.slug,
+              comingSoon: cat.comingSoon || false,
+              parentCategory: null,
+              children: [],
+            })),
+        ];
+
+        // Find children for each parent category
+        rootCategories.forEach((parent) => {
+          if (parent.id !== "all") {
+            // Skip "All" category
+            parent.children = data.category
+              .filter((cat) => cat.parentCategory === parent.id)
+              .map((child) => ({
+                id: child._id,
+                name: child.name,
+                slug: child.slug,
+                comingSoon: child.comingSoon || false,
+                parentCategory: child.parentCategory,
+              }));
+          }
+        });
+
+        return rootCategories;
+      };
+
+      setCategoryTree(buildCategoryTree());
     } catch (error) {
       console.warn(`Failed to fetch categories: ${error.message}`);
       setError("Failed to load categories. Please try again later.");
     }
   };
-
   const applyFilters = useCallback(() => {
     let filtered = [...products];
-    
+
     // Filter by category
     if (selectedCategory !== "all") {
       filtered = filtered.filter((item) =>
@@ -70,20 +109,10 @@ function Categories() {
     }
 
     // Update current category data
-    const currentCategory = categoryList.find(cat => cat.slug === selectedCategory);
+    const currentCategory = categoryList.find(
+      (cat) => cat.slug === selectedCategory
+    );
     setCurrentCategoryData(currentCategory);
-
-    // Filter by price range
-    if (priceRange !== "all") {
-      filtered = filtered.filter((item) => {
-        const price = item.price;
-        if (priceRange === "under-25") return price < 25;
-        if (priceRange === "25-35") return price >= 25 && price <= 35;
-        if (priceRange === "over-35") return price > 35;
-        return true;
-      });
-    }
-
     // Sorting
     if (sortBy === "price-low") {
       filtered.sort((a, b) => a.price - b.price);
@@ -94,7 +123,7 @@ function Categories() {
     }
 
     setFilteredProducts(filtered);
-  }, [products, selectedCategory, priceRange, sortBy, categoryList]);
+  }, [products, selectedCategory, sortBy, categoryList]);
 
   useEffect(() => {
     if (category) {
@@ -139,11 +168,11 @@ function Categories() {
           } md:block w-full md:w-64 space-y-6`}
         >
           {/* Categories */}
-          <div>
-            <h3 className="font-serif text-lg mb-3">Categories</h3>
-            <div className="space-y-2">
-              {categoryList.map((category) => (
-                <label key={category.id} className="flex items-center">
+          <div className="space-y-2">
+            {categoryTree.map((category) => (
+              <div key={category.id}>
+                {/* Parent category */}
+                <label className="flex items-center">
                   <input
                     type="radio"
                     name="category"
@@ -154,34 +183,28 @@ function Categories() {
                   />
                   {category.name}
                 </label>
-              ))}
-            </div>
-          </div>
 
-          {/* Price Range */}
-          {/* <div>
-            <h3 className="font-serif text-lg mb-3">Price Range</h3>
-            <div className="space-y-2">
-              {[
-                { label: "All", value: "all" },
-                { label: "Under 25", value: "under-25" },
-                { label: "25 - 35", value: "25-35" },
-                { label: "Over 35", value: "over-35" },
-              ].map((range) => (
-                <label key={range.value} className="flex items-center">
-                  <input
-                    type="radio"
-                    name="price"
-                    value={range.value}
-                    checked={priceRange === range.value}
-                    onChange={(e) => setPriceRange(e.target.value)}
-                    className="mr-2"
-                  />
-                  {range.label}
-                </label>
-              ))}
-            </div>
-          </div> */}
+                {/* Child categories (indented) */}
+                {category.children && category.children.length > 0 && (
+                  <div className="ml-6 mt-1 space-y-1">
+                    {category.children.map((child) => (
+                      <label key={child.id} className="flex items-center">
+                        <input
+                          type="radio"
+                          name="category"
+                          value={child.slug}
+                          checked={selectedCategory === child.slug}
+                          onChange={(e) => setSelectedCategory(e.target.value)}
+                          className="mr-2"
+                        />
+                        {child.name}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Products Grid */}
@@ -214,14 +237,18 @@ function Categories() {
             </div>
           ) : shouldShowComingSoon() ? (
             <div className="flex flex-col items-center justify-center w-full py-16">
-              <h2 className="text-3xl font-serif text-center mb-4">Coming Soon</h2>
+              <h2 className="text-3xl font-serif text-center mb-4">
+                Coming Soon
+              </h2>
               <p className="text-gray-600 text-center max-w-md">
-                We're working on adding products to this category. 
-                Please check back later or explore our other collections.
+                We&apos;re working on adding products to this category. Please
+                check back later or explore our other collections.
               </p>
             </div>
           ) : filteredProducts.length === 0 ? (
-            <p className="text-red-500 text-center w-full">{error || "No products found in this category."}</p>
+            <p className="text-red-500 text-center w-full">
+              {error || "No products found in this category."}
+            </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {filteredProducts.map((item) => (
@@ -239,7 +266,9 @@ function Categories() {
                       />
                     </div>
                     <div className="p-4">
-                      <h3 className="font-serif text-lg mb-2 truncate">{item.title}</h3>
+                      <h3 className="font-serif text-lg mb-2 truncate">
+                        {item.title}
+                      </h3>
                       <p className="text-gray-600 mb-2">£{item.price}</p>
                       <button className="btn btn-primary w-full">
                         View Details

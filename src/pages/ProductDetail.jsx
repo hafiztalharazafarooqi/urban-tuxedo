@@ -15,6 +15,7 @@ function ProductDetail() {
   const [error, setError] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedSizeQuantity, setSelectedSizeQuantity] = useState(null);
 
   const handleAddToCart = () => {
     // Get the current cart from localStorage (or use an empty array)
@@ -42,7 +43,7 @@ function ProductDetail() {
     setTimeout(() => {
       localStorage.setItem(
         "cart",
-        JSON.stringify([{ ...selectedProduct, quantity }])
+        JSON.stringify([{ ...selectedProduct, quantity, selectedSize }])
       );
       navigate("/cart");
     }, 1000);
@@ -68,6 +69,7 @@ function ProductDetail() {
         headers: { "Content-Type": "application/json" },
       });
       const data = await response.json();
+      // data.product.availableSizes[0].quantity = 0;
       setSelectedProduct(data.product);
       setLoading(false);
     } catch (error) {
@@ -88,6 +90,11 @@ function ProductDetail() {
 
   const handleImageClick = (img) => {
     setSelectedImage(img);
+  };
+
+  const onSizeSelect = (size) => {
+    setSelectedSizeQuantity(size.quantity);
+    setSelectedSize(size);
   };
 
   return (
@@ -192,15 +199,18 @@ function ProductDetail() {
                     <div className="flex gap-4">
                       {selectedProduct.availableSizes.map((size) => (
                         <button
-                          key={size}
+                          key={size._id}
+                          disabled={size.quantity <= 0}
                           className={`px-4 py-2 border rounded-md ${
-                            selectedSize === size
-                              ? "border-red-600 bg-red-600 text-white"
-                              : "border-gray-300 hover:border-red-600"
+                            size.quantity > 0
+                              ? selectedSize === size
+                                ? "border-red-600 bg-red-600 text-white"
+                                : "border-gray-300 hover:border-red-600"
+                              : "bg-gray-200 text-gray-400 cursor-not-allowed"
                           }`}
-                          onClick={() => setSelectedSize(size)}
+                          onClick={() => onSizeSelect(size)}
                         >
-                          {size}
+                          {size.size}
                         </button>
                       ))}
                     </div>
@@ -208,8 +218,13 @@ function ProductDetail() {
                 ) : (
                   ""
                 )}
-
-                {/* Quantity */}
+                {selectedSizeQuantity ? (
+                  <span className="text-sm text-gray-600">
+                    Only {selectedSizeQuantity} left in stock
+                  </span>
+                ) : (
+                  ""
+                )}
                 <div>
                   <h3 className="font-serif text-lg mb-2">Quantity</h3>
                   <div className="flex items-center gap-4">
@@ -222,7 +237,13 @@ function ProductDetail() {
                     <span className="text-xl">{quantity}</span>
                     <button
                       className="btn btn-primary px-4"
-                      onClick={() => setQuantity(quantity + 1)}
+                      onClick={() => {
+                        if (quantity < selectedSizeQuantity) {
+                          setQuantity(quantity + 1);
+                        }
+                      }}
+                      disabled={quantity >= selectedSizeQuantity}
+                      // onClick={() => setQuantity(quantity + 1)}
                     >
                       +
                     </button>

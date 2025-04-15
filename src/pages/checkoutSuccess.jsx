@@ -1,8 +1,16 @@
 import { CheckCircle } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 
 function CheckoutSuccess() {
-  const { orderId } = useParams();
+  // const { orderId } = useParams();
+
+  useEffect(() => {
+    return () => {
+      // Cleanup function to reset the cart in local storage
+      localStorage.removeItem("cart");
+    };
+  }, []);
 
   return (
     <div className="bg-gray-50 min-h-screen py-16">
@@ -15,15 +23,17 @@ function CheckoutSuccess() {
           <h1 className="text-3xl font-serif mb-2">Order Confirmed!</h1>
           <p className="text-gray-600 mb-4">
             Thank you for your purchase. Your order has been successfully
-            placed.
+            placed. A confirmation email will be sent to your registered email
+            address.
           </p>
+          <div className="w-full border-t border-gray-200 my-6"></div>
 
-          <div className="my-8 pb-6 border-b border-gray-200">
+          {/* <div className="my-8 pb-6 border-b border-gray-200">
             <div className="bg-gray-50 rounded-lg p-6 inline-block">
               <div className="text-sm text-gray-500 mb-1">Order Number</div>
               <div className="text-xl font-medium">#{orderId}</div>
             </div>
-          </div>
+          </div> */}
 
           {/* <p className="text-gray-600 mb-8">
             We&apos;ve sent a confirmation email to your registered email
@@ -75,7 +85,7 @@ function CheckoutSuccess() {
             >
               View All Orders
             </Link> */}
-          </div> 
+          </div>
         </div>
 
         {/* <div className="mt-8 text-center text-gray-500 text-sm">

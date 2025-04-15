@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FiPlus, FiTrash2, FiXSquare } from "react-icons/fi";
+import { FiEdit2, FiPlus, FiTrash2, FiXSquare } from "react-icons/fi";
 import AddCategoryForm from "./AddCategory";
 // import AddCategoryForm from "./AddCategory";
 
@@ -11,7 +11,9 @@ function CategoryManagement() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+
+  // const [statusFilter, setStatusFilter] = useState("");
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
@@ -78,9 +80,16 @@ function CategoryManagement() {
     }
   };
 
+  const handleEditCategory = (e) => {
+    console.log(e);
+    setSelectedCategoryId(e.id)
+    setShowAddModal(true);
+  };
+
   const handleAddCategory = (e) => {
     console.log(e);
     setShowAddModal(false);
+    setSelectedCategoryId('');
     // After successful addition, fetch category again
     fetchCategory();
   };
@@ -89,10 +98,11 @@ function CategoryManagement() {
     const matchesSearch = category.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      !statusFilter ||
-      category.status.toLowerCase().includes(statusFilter.toLowerCase());
-    return matchesSearch && matchesStatus;
+    // const matchesStatus =
+    //   !statusFilter ||
+    //   category.status.toLowerCase().includes(statusFilter.toLowerCase());
+    return matchesSearch;
+    // return matchesSearch && matchesStatus;
   });
 
   return (
@@ -219,7 +229,7 @@ function CategoryManagement() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full`}
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-96 overflow-hidden truncate`}
                         >
                           {category.description}
                         </span>
@@ -237,12 +247,12 @@ function CategoryManagement() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
-                          {/* <button
+                          <button
                             className="text-blue-600 hover:text-blue-900"
                             onClick={() => handleEditCategory(category)}
                           >
                             <FiEdit2 />
-                          </button> */}
+                          </button>
                           <button
                             className="text-red-600 hover:text-red-900"
                             onClick={() => handleDeleteCategory(category.id)}
@@ -271,7 +281,7 @@ function CategoryManagement() {
 
       {/* Add Category Modal */}
       {showAddModal && (
-        <AddCategoryForm onAddCategory={() => handleAddCategory(event)} />
+        <AddCategoryForm categoryID={selectedCategoryId} onAddCategory={() => handleAddCategory(event)} />
       )}
     </div>
   );

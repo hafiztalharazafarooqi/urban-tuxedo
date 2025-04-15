@@ -1,11 +1,11 @@
 import PropTypes from "prop-types";
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FiUpload, FiX } from "react-icons/fi";
 
 const uploadImage = async (file) => {
   if (!file) return null;
 
-  const apiKey = '87b38229ce97791b612d8ccae0d12b16'; // Replace with your ImgBB API key
+  const apiKey = "87b38229ce97791b612d8ccae0d12b16"; // Replace with your ImgBB API key
 
   const formData = new FormData();
   formData.append("image", file);
@@ -27,7 +27,7 @@ const uploadImage = async (file) => {
   }
 };
 
-const AddCategoryForm = ({ onAddCategory }) => {
+const AddCategoryForm = ({ onAddCategory, categoryID }) => {
   const [categoryData, setCategoryData] = useState({
     name: "",
     slug: "",
@@ -36,6 +36,7 @@ const AddCategoryForm = ({ onAddCategory }) => {
     isActive: true,
     parentCategory: "",
     comingSoon: false,
+    keywords: [],
   });
 
   const [imagePreview, setImagePreview] = useState(null);
@@ -47,16 +48,16 @@ const AddCategoryForm = ({ onAddCategory }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     // Handle checkbox inputs differently than text inputs
-    const newValue = type === 'checkbox' ? checked : value;
-    
-    setCategoryData({
-      ...categoryData,
+    const newValue = type === "checkbox" ? checked : value;
+
+    setCategoryData((prevData) => ({
+      ...prevData,
       [name]: newValue,
       // Only generate slug when name changes and it's not a checkbox
-      slug: name === "name" ? generateSlug(value) : categoryData.slug,
-    });
+      slug: name === "name" ? generateSlug(value) : prevData.slug,
+    }));
   };
 
   const handleImageChange = (e) => {
@@ -69,10 +70,10 @@ const AddCategoryForm = ({ onAddCategory }) => {
     };
     reader.readAsDataURL(file);
 
-    setCategoryData({
-      ...categoryData,
+    setCategoryData((prevData) => ({
+      ...prevData,
       image: file,
-    });
+    }));
   };
 
   const generateSlug = (name) => {
@@ -87,7 +88,20 @@ const AddCategoryForm = ({ onAddCategory }) => {
     setIsSubmitting(true);
 
     try {
-      const imageUrl = await uploadImage(categoryData.image);
+      // Upload image if it's a file
+      const imageUrl =
+        categoryData.image instanceof File
+          ? await uploadImage(categoryData.image)
+          : categoryData.image;
+
+      // Determine if this is an update or create operation
+      const isUpdateOperation = !!categoryID;
+      const url = isUpdateOperation
+        ? `${BACKEND_URL}/category/${categoryID}`
+        : `${BACKEND_URL}/category/`;
+
+      const method = isUpdateOperation ? "PUT" : "POST";
+
       const formattedData = {
         name: categoryData.name,
         slug: categoryData.slug,
@@ -96,34 +110,52 @@ const AddCategoryForm = ({ onAddCategory }) => {
         isActive: categoryData.isActive,
         parentCategory: categoryData.parentCategory || null,
         comingSoon: categoryData.comingSoon,
+        keywords: categoryData.keywords,
         createdAt: new Date().toISOString(),
       };
 
-      const response = await fetch(`${BACKEND_URL}/category/`, {
-        method: "POST",
+      const response = await fetch(url, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
+          accept: "application/json",
         },
         body: JSON.stringify(formattedData),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add category");
+        throw new Error(
+          `Failed to ${isUpdateOperation ? "update" : "add"} category`
+        );
       }
 
       const data = await response.json();
       onAddCategory(data);
-      alert("Category added successfully!");
+      alert(
+        `Category ${isUpdateOperation ? "updated" : "added"} successfully!`
+      );
     } catch (error) {
-      console.error("Error adding category:", error);
-      alert("Failed to add category. Please try again.");
+      console.error(
+        `Error ${categoryID ? "updating" : "adding"} category:`,
+        error
+      );
+      alert(
+        `Failed to ${categoryID ? "update" : "add"} category. Please try again.`
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
+
   useEffect(() => {
     getCategory();
   }, []);
+
+  useEffect(() => {
+    if (categoryID) {
+      getCategoryById(categoryID);
+    }
+  }, [categoryID]);
 
   const getCategory = async () => {
     try {
@@ -132,14 +164,42 @@ const AddCategoryForm = ({ onAddCategory }) => {
         headers: { "Content-Type": "application/json" },
       });
       const data = await response.json();
-      const formattedCategory = data.category.map((category) => ({
-        id: category._id, // _id is already a string in actual API response
-        name: category.name,
-        slug: category.slug,
-      }));
+      const formattedCategory = data.category
+        .filter((category) => category.parentCategory === null)
+        .map((category) => ({
+          id: category._id,
+          name: category.name,
+          slug: category.slug,
+        }));
       setCategoryList(formattedCategory);
     } catch (error) {
       console.warn(`Failed to fetch category: ${error.message}`);
+    }
+  };
+
+  const getCategoryById = async (id) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/category/${id}`);
+      if (!response.ok) throw new Error("Failed to fetch category data");
+
+      const data = await response.json();
+
+      setCategoryData({
+        name: data.category.name || "",
+        slug: data.category.slug || "",
+        description: data.category.description || "",
+        image: data.category.image || null,
+        isActive:
+          data.category.isActive !== undefined ? data.category.isActive : true,
+        parentCategory: data.category.parentCategory || "",
+        comingSoon: data.category.comingSoon || false,
+        keywords: data.category.keywords || [],
+      });
+
+      setImagePreview(data.category.image || null);
+    } catch (error) {
+      console.error("Error fetching category data:", error);
+      alert("Failed to fetch category details. Please try again.");
     }
   };
 
@@ -147,7 +207,9 @@ const AddCategoryForm = ({ onAddCategory }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 max-w-4xl w-full max-h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-serif">Add New Category</h2>
+          <h2 className="text-2xl font-serif">
+            {categoryID ? "Edit Category" : "Add New Category"}
+          </h2>
           <button
             onClick={() => onAddCategory(false)}
             className="text-gray-500 hover:text-gray-700"
@@ -197,7 +259,7 @@ const AddCategoryForm = ({ onAddCategory }) => {
                 >
                   <option value="">None</option>
                   {categoryList.map((category) => (
-                    <option key={category._id} value={category._id}>
+                    <option key={category.id} value={category.id}>
                       {category.name}
                     </option>
                   ))}
@@ -219,6 +281,7 @@ const AddCategoryForm = ({ onAddCategory }) => {
                   required
                 ></textarea>
               </div>
+
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -228,14 +291,17 @@ const AddCategoryForm = ({ onAddCategory }) => {
                   onChange={handleChange}
                   className="h-4 w-4 text-red-500 focus:ring-red-400 border-gray-300 rounded"
                 />
-                <label htmlFor="comingSoon" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="comingSoon"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Mark as &quot;Coming Soon&quot;
                 </label>
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Image
+                Category Image
               </label>
               <div className="mt-1 flex items-center">
                 <input
@@ -269,18 +335,20 @@ const AddCategoryForm = ({ onAddCategory }) => {
                   )}
                 </button>
               </div>
-              
+
               {categoryData.parentCategory && (
                 <div className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200">
                   <p className="text-sm text-gray-600">
-                    This will be created as a subcategory under &quot;{categoryData.parentCategory}&quot;
+                    This will be created as a subcategory under{" "}
                     <strong>
-                      {categoryList.find(cat => cat._id === categoryData.parentCategory)?.name || ""}
+                      {categoryList.find(
+                        (cat) => cat.id === categoryData.parentCategory
+                      )?.name || ""}
                     </strong>
                   </p>
                 </div>
               )}
-              
+
               {categoryData.comingSoon && (
                 <div className="mt-4 p-3 bg-yellow-50 rounded-md border border-yellow-200">
                   <p className="text-sm text-yellow-700">
@@ -304,7 +372,13 @@ const AddCategoryForm = ({ onAddCategory }) => {
               className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Adding..." : "Add Category"}
+              {isSubmitting
+                ? categoryID
+                  ? "Updating..."
+                  : "Adding..."
+                : categoryID
+                ? "Update Category"
+                : "Add Category"}
             </button>
           </div>
         </form>
@@ -315,6 +389,7 @@ const AddCategoryForm = ({ onAddCategory }) => {
 
 AddCategoryForm.propTypes = {
   onAddCategory: PropTypes.func.isRequired,
+  categoryID: PropTypes.string,
 };
 
 export default AddCategoryForm;

@@ -15,6 +15,7 @@ function Checkout() {
   });
 
   const [cartItems, setCartItems] = useState([]);
+  const [loader, setLoader] = useState(false);
   const [subtotal, setSubtotal] = useState(0);
   const shippingCost = 15.0;
 
@@ -36,9 +37,19 @@ function Checkout() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  function cartItemsForCheckout() {
+    return cartItems.map((item) => ({
+      _id: item._id,
+      title: item.title,
+      price: item.price,
+      images: item.images,
+      selectedSize: item.selectedSize?.size || null, // Extract only the size
+      quantity: item.selectedSize?.quantity || 1, // Ensure quantity is included
+    }));
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoader(true);
     const orderData = {
       customer: {
         firstName: formData.firstName,
@@ -54,11 +65,11 @@ function Checkout() {
       },
       paymentMethod: formData.paymentMethod,
       status: "processing",
-      items: cartItems,
+      items: cartItemsForCheckout(),
       totalAmount: subtotal + shippingCost,
     };
     const BACKEND_URL = import.meta.env.VITE_API_URL;
-
+    console.log({ orderData });
     try {
       const response = await fetch(`${BACKEND_URL}/products/checkout`, {
         method: "POST",
@@ -75,10 +86,12 @@ function Checkout() {
       const data = await response.json();
 
       window.location.href = data.url;
+      setLoader(false);
       // setOrderId(data.orderId);
       // setShowPopup(true);
     } catch (error) {
       console.error("Error placing order:", error);
+      setLoader(false);
       // You might want to show an error message to the user here
       alert("Failed to place order. Please try again.");
     }
@@ -95,7 +108,12 @@ function Checkout() {
             <div>
               <div className="flex justify-between">
                 <h2 className="font-serif text-xl mb-4">Contact Information</h2>
-                <Link to={'/login'} className="font-serif text-xl mb-4 hover:text-red-600 hover:font-bold hover:text-ellipsis">Login</Link>
+                <Link
+                  to={"/login"}
+                  className="font-serif text-xl mb-4 hover:text-red-600 hover:font-bold hover:text-ellipsis"
+                >
+                  Login
+                </Link>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
@@ -186,7 +204,7 @@ function Checkout() {
               type="submit"
               className="w-full px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              Place Order
+              {loader ? "Placing Order" : "Place Order"}
             </button>
           </form>
         </div>
