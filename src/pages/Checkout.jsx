@@ -17,7 +17,7 @@ function Checkout() {
   const [cartItems, setCartItems] = useState([]);
   const [loader, setLoader] = useState(false);
   const [subtotal, setSubtotal] = useState(0);
-  const shippingCost = 15.0;
+  const shippingCost = 0;
 
   // Popup state
 
@@ -217,10 +217,10 @@ function Checkout() {
               <span>Subtotal</span>
               <span>£{subtotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <span>Shipping</span>
               <span>£{shippingCost.toFixed(2)}</span>
-            </div>
+            </div> */}
             <div className="border-t pt-4">
               <div className="flex justify-between font-semibold">
                 <span>Total</span>

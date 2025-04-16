@@ -31,6 +31,8 @@ const AddProductForm = ({ onAddProduct, productID }) => {
   const [productData, setProductData] = useState({
     title: "",
     price: "",
+    discountRate: "", // Added discount rate field
+    discountedPrice: "", // Added discounted price field
     description: "",
     category: "",
     images: {
@@ -56,10 +58,31 @@ const AddProductForm = ({ onAddProduct, productID }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setProductData((prevData) => ({
-      ...prevData,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setProductData((prevData) => {
+      const updatedData = {
+        ...prevData,
+        [name]: type === "checkbox" ? checked : value,
+      };
+
+      // Calculate discounted price when price or discount rate changes
+      if (name === "price" || name === "discountRate") {
+        const price =
+          name === "price" ? parseFloat(value) : parseFloat(prevData.price);
+        const discountRate =
+          name === "discountRate"
+            ? parseFloat(value)
+            : parseFloat(prevData.discountRate);
+
+        if (!isNaN(price) && !isNaN(discountRate) && discountRate > 0) {
+          const discount = price * (discountRate / 100);
+          updatedData.discountedPrice = (price - discount).toFixed(2);
+        } else {
+          updatedData.discountedPrice = "";
+        }
+      }
+
+      return updatedData;
+    });
   };
 
   const handleAddSize = () => {
@@ -68,7 +91,7 @@ const AddProductForm = ({ onAddProduct, productID }) => {
       const sizes = {
         size: sizeInput.trim(),
         quantity: sizeQuantityInput,
-      };      
+      };
       setProductData((prevData) => ({
         ...prevData,
         availableSizes: [...prevData.availableSizes, sizes],
@@ -76,14 +99,16 @@ const AddProductForm = ({ onAddProduct, productID }) => {
       setSizeInput("");
       setSizeQuantityInput(1);
     }
-    productData.defaultQuantity = productData.defaultQuantity + Number(sizeQuantityInput);
+    productData.defaultQuantity =
+      productData.defaultQuantity + Number(sizeQuantityInput);
   };
 
   const handleRemoveSize = (index) => {
     const selectedSize = productData.availableSizes[index];
-   
-    productData.defaultQuantity = productData.defaultQuantity - Number(selectedSize.quantity);
-    
+
+    productData.defaultQuantity =
+      productData.defaultQuantity - Number(selectedSize.quantity);
+
     setProductData((prevData) => {
       const updatedSizes = [...prevData.availableSizes];
       // Remove the size from the array
@@ -187,6 +212,12 @@ const AddProductForm = ({ onAddProduct, productID }) => {
       const formattedData = {
         ...productData,
         price: parseFloat(productData.price),
+        discountRate: productData.discountRate
+          ? parseFloat(productData.discountRate)
+          : 0,
+        discountedPrice: productData.discountedPrice
+          ? parseFloat(productData.discountedPrice)
+          : null,
         defaultQuantity: parseInt(productData.defaultQuantity) || 1,
         images: {
           primary: primaryImageUrl,
@@ -281,6 +312,12 @@ const AddProductForm = ({ onAddProduct, productID }) => {
         ...prevData,
         title: data.product.title || "",
         price: data.product.price ? data.product.price.toString() : "",
+        discountRate: data.product.discountRate
+          ? data.product.discountRate.toString()
+          : "",
+        discountedPrice: data.product.discountedPrice
+          ? data.product.discountedPrice.toString()
+          : "",
         description: data.product.description || "",
         category: data.product.category || "",
         images: {
@@ -346,6 +383,37 @@ const AddProductForm = ({ onAddProduct, productID }) => {
                 />
               </div>
 
+              {/* New discount rate field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Discount Rate (%)
+                </label>
+                <input
+                  type="number"
+                  name="discountRate"
+                  value={productData.discountRate}
+                  onChange={handleChange}
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  className="w-full px-4 py-2 border rounded-md"
+                />
+              </div>
+
+              {/* Discounted price field (read-only) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Discounted Price
+                </label>
+                <input
+                  type="number"
+                  name="discountedPrice"
+                  value={productData.discountedPrice}
+                  readOnly
+                  className="w-full px-4 py-2 border rounded-md bg-gray-50"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Category*
@@ -363,30 +431,6 @@ const AddProductForm = ({ onAddProduct, productID }) => {
                     </option>
                   ))}
                 </select>
-
-                {/* <input
-                  type="text"
-                  name="category"
-                  value={productData.category}
-                  onChange={handleChange}
-                  placeholder="e.g. Accessories/Formal Wear"
-                  className="w-full px-4 py-2 border rounded-md"
-                /> */}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Default Quantity
-                </label>
-                <input
-                  type="number"
-                  name="defaultQuantity"
-                  value={productData.defaultQuantity}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 border rounded-md"
-                  disabled
-                />
               </div>
 
               <div>
@@ -468,7 +512,20 @@ const AddProductForm = ({ onAddProduct, productID }) => {
                   ))}
                 </div>
               </div>
-
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Default Quantity
+                </label>
+                <input
+                  type="number"
+                  name="defaultQuantity"
+                  value={productData.defaultQuantity}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-2 border rounded-md"
+                  disabled
+                />
+              </div>
               {/* Primary Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -565,7 +622,11 @@ const AddProductForm = ({ onAddProduct, productID }) => {
               className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Adding..." : "Add Product"}
+              {isSubmitting
+                ? "Adding..."
+                : productID
+                ? "Update Product"
+                : "Add Product"}
             </button>
           </div>
         </form>
@@ -576,7 +637,7 @@ const AddProductForm = ({ onAddProduct, productID }) => {
 
 AddProductForm.propTypes = {
   onAddProduct: PropTypes.func.isRequired,
-  productID: PropTypes.string.isRequired,
+  productID: PropTypes.string,
 };
 
 export default AddProductForm;

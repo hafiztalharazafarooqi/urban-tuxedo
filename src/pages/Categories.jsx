@@ -264,12 +264,33 @@ function Categories() {
                         alt="Product"
                         className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
                       />
+
+                      {/* Discount percentage badge/splodge */}
+                      {item.discountRate > 0 && (
+                        <div className="absolute top-0 right-0 bg-red-500 text-white font-bold rounded-bl-lg px-3 py-1">
+                          -{item.discountRate}%
+                        </div>
+                      )}
                     </div>
                     <div className="p-4">
                       <h3 className="font-serif text-lg mb-2 truncate">
                         {item.title}
                       </h3>
-                      <p className="text-gray-600 mb-2">£{item.price}</p>
+
+                      {/* Price display logic */}
+                      {item.discountRate > 0 ? (
+                        <div className="mb-2">
+                          <span className="text-gray-500 line-through mr-2">
+                            £{item.price}
+                          </span>
+                          <span className="text-red-600 font-semibold">
+                            £{item.discountedPrice}
+                          </span>
+                        </div>
+                      ) : (
+                        <p className="text-gray-600 mb-2">£{item.price}</p>
+                      )}
+
                       <button className="btn btn-primary w-full">
                         View Details
                       </button>

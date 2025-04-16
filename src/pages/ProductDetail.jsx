@@ -179,9 +179,23 @@ function ProductDetail() {
               <h1 className="text-3xl font-serif mb-4">
                 {selectedProduct?.title}
               </h1>
-              <p className="text-2xl text-red-600 mb-6">
-                £{selectedProduct?.price}
+              {
+                selectedProduct?.discountedPrice ? (
+                  <p className="text-lg text-gray-500 line-through mb-2">
+                    £{selectedProduct?.price}
+                  </p>
+                ) : (
+                  <p className="text-2xl text-red-600 mb-6">
+                    £{selectedProduct?.price}
+                  </p>
+                )
+              }
+              {selectedProduct?.discountedPrice ?(
+
+                <p className="text-2xl text-red-600 mb-6">
+                £{selectedProduct?.discountedPrice}
               </p>
+              ) : ''}
 
               <div className="space-y-6">
                 <div>

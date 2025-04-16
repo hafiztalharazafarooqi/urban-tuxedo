@@ -49,7 +49,7 @@ function Cart() {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-  const shipping = 15.0;
+  const shipping = 0;
   const total = subtotal + shipping;
 
   // Empty cart state
@@ -177,10 +177,10 @@ function Cart() {
                   </span>
                   <span>£{subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-gray-600">
+                {/* <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
                   <span>£{shipping.toFixed(2)}</span>
-                </div>
+                </div> */}
                 <div className="border-t border-gray-100 pt-4 mt-4">
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
