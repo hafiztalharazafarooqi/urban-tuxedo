@@ -46,7 +46,11 @@ function Cart() {
 
   // Calculate subtotal, shipping, and total.
   const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+    (acc, item) =>
+      acc +
+      (item.discountRate > 0
+        ? item.discountedPrice * item.quantity
+        : item.price * item.quantity),
     0
   );
   const shipping = 0;
@@ -119,10 +123,19 @@ function Cart() {
                       </button>
                     </div>
                     <p className="font-medium mt-1">
-                      <span className="text-red-500 ">£{item.price}</span>
+                      <span className="text-red-500 ">
+                        £
+                        {item.discountRate > 0
+                          ? item.discountedPrice
+                          : item.price}
+                      </span>
                       {item.selectedSize ? (
                         <span className="ml-3">
-                          size: {item.selectedSize.size} <small className="font-light">(Only {item.selectedSize.quantity} items are available in stock)</small>
+                          size: {item.selectedSize.size}{" "}
+                          <small className="font-light">
+                            (Only {item.selectedSize.quantity} items are
+                            available in stock)
+                          </small>
                         </span>
                       ) : (
                         ""
@@ -155,7 +168,9 @@ function Cart() {
                         </button>
                       </div>
                       <span className="text-gray-500 text-sm">
-                        Total: £{(item.price * item.quantity).toFixed(2)}
+                      Total: £{item.discountRate > 0
+                          ? (item.discountedPrice * item.quantity).toFixed(2)
+                          : (item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   </div>

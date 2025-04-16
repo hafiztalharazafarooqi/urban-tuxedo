@@ -26,8 +26,16 @@ function Checkout() {
     setCartItems(storedCart);
 
     // Calculate subtotal
+    // const total = storedCart.reduce(
+    //   (acc, item) => acc + item.price * item.quantity,
+    //   0
+    // );
     const total = storedCart.reduce(
-      (acc, item) => acc + item.price * item.quantity,
+      (acc, item) =>
+        acc +
+        (item.discountRate > 0
+          ? item.discountedPrice * item.quantity
+          : item.price * item.quantity),
       0
     );
     setSubtotal(total);
@@ -41,7 +49,7 @@ function Checkout() {
     return cartItems.map((item) => ({
       _id: item._id,
       title: item.title,
-      price: item.price,
+      price: item.discountRate > 0 ? item.discountedPrice : item.price,
       images: item.images,
       selectedSize: item.selectedSize?.size || null, // Extract only the size
       quantity: item.selectedSize?.quantity || 1, // Ensure quantity is included
