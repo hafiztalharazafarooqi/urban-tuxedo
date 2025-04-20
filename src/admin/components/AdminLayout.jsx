@@ -8,6 +8,7 @@ import {
   // FiSettings,
   FiShoppingBag,
   FiUsers,
+  FiSpeaker,
   FiX
 } from 'react-icons/fi';
 import { Link, Outlet, useLocation } from 'react-router-dom';
@@ -23,6 +24,7 @@ function AdminLayout() {
     { path: '/admin/products', icon: FiBox, label: 'Products' },
     { path: '/admin/orders', icon: FiShoppingBag, label: 'Orders' },
     { path: '/admin/customers', icon: FiUsers, label: 'Customers' },
+    { path: '/admin/promotions', icon: FiSpeaker, label: 'Promotions' },
     // { path: '/admin/reports', icon: FiBarChart2, label: 'Reports' },
     // { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
   ];

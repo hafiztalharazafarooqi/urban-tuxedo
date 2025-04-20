@@ -29,6 +29,7 @@ import Settings from "./admin/pages/Settings";
 import ProtectedRoute from "./core/protected-route";
 import CheckoutSuccess from "./pages/checkoutSuccess";
 import ForgetPassword from "./pages/ForgetPassword";
+import PromotionsManager from "./admin/pages/PromotionManagement";
 
 function ClientLayout() {
   return (
@@ -69,6 +70,7 @@ function App() {
           <Route path="orders" element={<OrderManagement />} />
           <Route path="order/:orderId" element={<OrderDetail />} />
           <Route path="customers" element={<CustomerManagement />} />
+          <Route path="promotions" element={<PromotionsManager />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
         </Route>

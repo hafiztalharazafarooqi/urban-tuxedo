@@ -1,6 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { FiPlus, FiUpload, FiX } from "react-icons/fi";
+import { Edit2 } from "lucide-react";
 import PropTypes from "prop-types";
+import { useEffect, useRef, useState } from "react";
+import {
+  FiArrowLeft,
+  FiArrowRight,
+  FiPlus,
+  FiUpload,
+  FiX,
+} from "react-icons/fi";
 
 const uploadImage = async (file) => {
   if (!file) return null;
@@ -31,8 +38,8 @@ const AddProductForm = ({ onAddProduct, productID }) => {
   const [productData, setProductData] = useState({
     title: "",
     price: "",
-    discountRate: "", // Added discount rate field
-    discountedPrice: "", // Added discounted price field
+    discountRate: "",
+    discountedPrice: "",
     description: "",
     category: "",
     images: {
@@ -42,14 +49,20 @@ const AddProductForm = ({ onAddProduct, productID }) => {
     availableSizes: [],
     defaultQuantity: 0,
     isFeatured: false,
+    colorVariants: [], // Array to store color variants
   });
 
   const [sizeInput, setSizeInput] = useState("");
+  const [sizeId, setSizeId] = useState("");
   const [sizeQuantityInput, setSizeQuantityInput] = useState(1);
   const [primaryImagePreview, setPrimaryImagePreview] = useState(null);
   const [galleryPreviews, setGalleryPreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categoryList, setCategoryList] = useState([]);
+  const [activeTab, setActiveTab] = useState(0);
+
+  // Color variant form state
+  const [colorInput, setColorInput] = useState("");
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
@@ -86,38 +99,84 @@ const AddProductForm = ({ onAddProduct, productID }) => {
   };
 
   const handleAddSize = () => {
-    if (sizeInput.trim() && sizeQuantityInput > 0) {
-      // const size = `${sizeInput.trim()} - (${sizeQuantityInput})`; // e.g. 38R (5)
-      const sizes = {
-        size: sizeInput.trim(),
-        quantity: sizeQuantityInput,
-      };
-      setProductData((prevData) => ({
+    if (sizeQuantityInput <= 0) return;
+  
+    const trimmedColor = colorInput.trim();
+    const trimmedSize = sizeInput.trim();
+  
+    const isColorMissing = !trimmedColor;
+    const isSizeMissing = !trimmedSize;
+  
+    const color = isColorMissing ? "NOCOLOR" : trimmedColor;
+    const size = isSizeMissing ? "FREESIZE" : trimmedSize;
+  
+    const newSizeEntry = {
+      color,
+      size,
+      quantity: sizeQuantityInput,
+    };
+  
+    setProductData((prevData) => {
+      let updatedSizes = [...prevData.availableSizes];
+      let updatedDefaultQuantity = prevData.defaultQuantity;
+  
+      // If editing existing size (sizeId is an index or unique ID)
+      if (sizeId != '') {
+        const index = updatedSizes.findIndex((item) => item._id === sizeId);
+        if (index !== -1) {
+          const oldQuantity = updatedSizes[index].quantity || 0;
+          updatedDefaultQuantity += Number(sizeQuantityInput) - Number(oldQuantity);
+          updatedSizes[index] = newSizeEntry;
+        }
+      } else if (isColorMissing && isSizeMissing) {
+        // Both missing: replace entire list with the default entry
+        updatedSizes = [newSizeEntry];
+        updatedDefaultQuantity = sizeQuantityInput;
+      } else {
+        // Add new size normally
+        updatedSizes.push(newSizeEntry);
+        updatedDefaultQuantity += Number(sizeQuantityInput);
+      }
+  
+      return {
         ...prevData,
-        availableSizes: [...prevData.availableSizes, sizes],
-      }));
-      setSizeInput("");
-      setSizeQuantityInput(1);
-    }
-    productData.defaultQuantity =
-      productData.defaultQuantity + Number(sizeQuantityInput);
+        availableSizes: updatedSizes,
+        defaultQuantity: updatedDefaultQuantity,
+      };
+    });
+  
+    // Reset inputs
+    setColorInput("");
+    setSizeInput("");
+    setSizeQuantityInput(1);
+    setSizeId(''); // Clear edit state
   };
+  
 
   const handleRemoveSize = (index) => {
     const selectedSize = productData.availableSizes[index];
 
-    productData.defaultQuantity =
-      productData.defaultQuantity - Number(selectedSize.quantity);
-
     setProductData((prevData) => {
       const updatedSizes = [...prevData.availableSizes];
-      // Remove the size from the array
       updatedSizes.splice(index, 1);
       return {
         ...prevData,
         availableSizes: updatedSizes,
+        defaultQuantity:
+          prevData.defaultQuantity - Number(selectedSize.quantity),
       };
     });
+  };
+
+  const handleUpdateSize = (index) => {
+    const selectedSize = productData.availableSizes[index];
+   
+    const size = selectedSize.size === "FREESIZE" ? '' : selectedSize.size;
+    const color = selectedSize.color === "NOCOLOR" ? '' : selectedSize.color;
+    setSizeInput(size);
+    setSizeQuantityInput(selectedSize.quantity);
+    setColorInput(color);
+    setSizeId(selectedSize._id);
   };
 
   const handlePrimaryImageChange = (e) => {
@@ -208,6 +267,21 @@ const AddProductForm = ({ onAddProduct, productID }) => {
         )
       );
 
+      // Upload color variant images
+      const processedColorVariants = await Promise.all(
+        productData.colorVariants.map(async (variant) => {
+          const imageUrl =
+            variant.image instanceof File
+              ? await uploadImage(variant.image)
+              : variant.image;
+
+          return {
+            color: variant.color,
+            image: imageUrl,
+          };
+        })
+      );
+
       // Format data for API
       const formattedData = {
         ...productData,
@@ -221,8 +295,9 @@ const AddProductForm = ({ onAddProduct, productID }) => {
         defaultQuantity: parseInt(productData.defaultQuantity) || 1,
         images: {
           primary: primaryImageUrl,
-          gallery: galleryImageUrls,
+          gallery: galleryImageUrls.filter((url) => url !== null),
         },
+        colorVariants: processedColorVariants.filter((v) => v.image !== null),
       };
 
       // Determine if this is an update or create operation
@@ -327,10 +402,25 @@ const AddProductForm = ({ onAddProduct, productID }) => {
         availableSizes: data.product.availableSizes || [],
         defaultQuantity: data.product.defaultQuantity || 1,
         isFeatured: data.product.isFeatured || false,
+        colorVariants: data.product.colorVariants || [],
       }));
 
       setPrimaryImagePreview(data.product.images?.primary || null);
       setGalleryPreviews(data.product.images?.gallery || []);
+
+      // If color variants exist, set their previews
+      if (data.product.colorVariants && data.product.colorVariants.length > 0) {
+        const variantsWithPreviews = data.product.colorVariants.map(
+          (variant) => ({
+            ...variant,
+            imagePreview: variant.image,
+          })
+        );
+        setProductData((prev) => ({
+          ...prev,
+          colorVariants: variantsWithPreviews,
+        }));
+      }
     } catch (error) {
       console.error("Error fetching product data:", error);
     }
@@ -338,9 +428,11 @@ const AddProductForm = ({ onAddProduct, productID }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-8 max-w-4xl w-full max-h-screen overflow-y-auto">
+      <div className="bg-white rounded-xl p-6 w-11/12 max-w-6xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-serif">Add New Product</h2>
+          <h2 className="text-2xl font-bold">
+            {productID ? "Edit Product" : "Add New Product"}
+          </h2>
           <button
             onClick={() => onAddProduct(false)}
             className="text-gray-500 hover:text-gray-700"
@@ -349,88 +441,79 @@ const AddProductForm = ({ onAddProduct, productID }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left column */}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Product Title*
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  value={productData.title}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border rounded-md"
-                  required
-                />
-              </div>
+        {/* Wizard Tabs */}
+        <div className="mb-8">
+          <div className="flex border-b">
+            <button
+              onClick={() => setActiveTab(0)}
+              className={`px-6 py-3 font-medium text-sm ${
+                activeTab === 0
+                  ? "border-b-2 border-red-500 text-red-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Basic Info
+            </button>
+            <button
+              onClick={() => setActiveTab(1)}
+              className={`px-6 py-3 font-medium text-sm ${
+                activeTab === 1
+                  ? "border-b-2 border-red-500 text-red-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Price & Inventory
+            </button>
+            <button
+              onClick={() => setActiveTab(2)}
+              className={`px-6 py-3 font-medium text-sm ${
+                activeTab === 2
+                  ? "border-b-2 border-red-500 text-red-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Images
+            </button>
+          </div>
+        </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price*
-                </label>
-                <input
-                  type="number"
-                  name="price"
-                  value={productData.price}
-                  onChange={handleChange}
-                  step="0.01"
-                  min="0"
-                  className="w-full px-4 py-2 border rounded-md"
-                  required
-                />
-              </div>
+        <form onSubmit={handleSubmit}>
+          {/* Tab 1: Basic Info */}
+          {activeTab === 0 && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Product Title*
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={productData.title}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-200 focus:border-red-500"
+                    required
+                  />
+                </div>
 
-              {/* New discount rate field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Discount Rate (%)
-                </label>
-                <input
-                  type="number"
-                  name="discountRate"
-                  value={productData.discountRate}
-                  onChange={handleChange}
-                  step="0.01"
-                  min="0"
-                  max="100"
-                  className="w-full px-4 py-2 border rounded-md"
-                />
-              </div>
-
-              {/* Discounted price field (read-only) */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Discounted Price
-                </label>
-                <input
-                  type="number"
-                  name="discountedPrice"
-                  value={productData.discountedPrice}
-                  readOnly
-                  className="w-full px-4 py-2 border rounded-md bg-gray-50"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category*
-                </label>
-                <select
-                  name="category"
-                  className="w-full px-4 py-2 border rounded-md"
-                  value={productData.category}
-                  onChange={handleChange}
-                  required
-                >
-                  {categoryList.map((category) => (
-                    <option key={category.id} value={category.slug}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Category*
+                  </label>
+                  <select
+                    name="category"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-200 focus:border-red-500"
+                    value={productData.category}
+                    onChange={handleChange}
+                    required
+                  >
+                    {categoryList.map((category) => (
+                      <option key={category.id} value={category.slug}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>
@@ -441,11 +524,12 @@ const AddProductForm = ({ onAddProduct, productID }) => {
                   name="description"
                   value={productData.description}
                   onChange={handleChange}
-                  rows="4"
-                  className="w-full px-4 py-2 border rounded-md"
+                  rows="6"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-200 focus:border-red-500"
                   required
                 ></textarea>
               </div>
+
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -459,176 +543,323 @@ const AddProductForm = ({ onAddProduct, productID }) => {
                   htmlFor="isFeatured"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Mark as &quot;Featured Product&quot;
+                  Mark as Featured Product
                 </label>
               </div>
-            </div>
 
-            {/* Right column */}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Available Sizes
-                </label>
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={sizeInput}
-                    onChange={(e) => setSizeInput(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md"
-                    placeholder="e.g. 38R, 40R"
-                  />
+              <div className="flex justify-end space-x-4 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab(1)}
+                  className="px-6 py-2 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 flex items-center gap-2"
+                >
+                  Next: Price & Inventory <FiArrowRight />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 2: Price & Inventory */}
+          {activeTab === 1 && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Price*
+                  </label>
                   <input
                     type="number"
-                    value={sizeQuantityInput}
-                    onChange={(e) => setSizeQuantityInput(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md"
-                    min="1"
+                    name="price"
+                    value={productData.price}
+                    onChange={handleChange}
+                    step="0.01"
+                    min="0"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-200 focus:border-red-500"
+                    required
                   />
-                  <button
-                    type="button"
-                    onClick={handleAddSize}
-                    className="btn bg-gray-800 text-white px-3 py-2 rounded-md"
-                  >
-                    <FiPlus size={20} />
-                  </button>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {productData?.availableSizes?.map((size, index) => (
-                    <div
-                      key={index}
-                      className="bg-gray-200 rounded-full px-3 py-1 flex items-center gap-1"
-                    >
-                      <span>{size?.size}</span> -<span>({size?.quantity})</span>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Discount Rate (%)
+                  </label>
+                  <input
+                    type="number"
+                    name="discountRate"
+                    value={productData.discountRate}
+                    onChange={handleChange}
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-200 focus:border-red-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Discounted Price
+                  </label>
+                  <input
+                    type="number"
+                    name="discountedPrice"
+                    value={productData.discountedPrice}
+                    readOnly
+                    className="w-full px-4 py-2 border rounded-lg bg-gray-50"
+                  />
+                </div>
+              </div>
+
+              <div className="p-4 bg-gray-50 rounded-lg mt-6">
+                <div className="space-y-4">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-grow">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Color Name
+                      </label>
+                      <input
+                        type="text"
+                        value={colorInput}
+                        onChange={(e) => setColorInput(e.target.value)}
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-200 focus:border-red-500"
+                        placeholder="e.g. Red, Blue, Green"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Size
+                      </label>
+                      <input
+                        type="text"
+                        value={sizeInput}
+                        onChange={(e) => setSizeInput(e.target.value)}
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-200 focus:border-red-500"
+                        placeholder="e.g. 38R, 40R"
+                      />
+                    </div>
+                    <div className="w-32">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Quantity
+                      </label>
+                      <input
+                        type="number"
+                        value={sizeQuantityInput}
+                        onChange={(e) => setSizeQuantityInput(e.target.value)}
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-200 focus:border-red-500"
+                        min="1"
+                      />
+                    </div>
+                    <div className="flex items-end">
                       <button
                         type="button"
-                        onClick={() => handleRemoveSize(index)}
-                        className="text-gray-500 hover:text-gray-700"
+                        onClick={handleAddSize}
+                        className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center gap-2"
                       >
-                        <FiX size={16} />
+                        <FiPlus size={16} /> Add Size
                       </button>
                     </div>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Default Quantity
-                </label>
-                <input
-                  type="number"
-                  name="defaultQuantity"
-                  value={productData.defaultQuantity}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 border rounded-md"
-                  disabled
-                />
-              </div>
-              {/* Primary Image Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Primary Image
-                </label>
-                <div className="mt-1 flex items-center">
-                  <input
-                    type="file"
-                    ref={primaryFileInputRef}
-                    onChange={handlePrimaryImageChange}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => primaryFileInputRef.current.click()}
-                    className="flex items-center justify-center w-full border-2 border-dashed border-gray-300 px-6 py-4 rounded-md text-sm text-gray-500 hover:bg-gray-50"
-                  >
-                    {primaryImagePreview ? (
-                      <div className="w-full">
-                        <img
-                          src={primaryImagePreview}
-                          alt="Primary preview"
-                          className="h-40 mx-auto object-contain rounded-md"
-                        />
-                        <p className="mt-2 text-center text-xs">
-                          Click to change image
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <FiUpload className="mx-auto h-8 w-8" />
-                        <p className="mt-1">Upload primary product image</p>
-                      </div>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Gallery Images Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gallery Images
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="file"
-                    ref={galleryFileInputRef}
-                    onChange={handleGalleryImagesChange}
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => galleryFileInputRef.current.click()}
-                    className="flex items-center justify-center w-full border-2 border-dashed border-gray-300 px-6 py-4 rounded-md text-sm text-gray-500 hover:bg-gray-50"
-                  >
-                    <div className="text-center">
-                      <FiUpload className="mx-auto h-8 w-8" />
-                      <p className="mt-1">Upload additional product images</p>
-                    </div>
-                  </button>
-                </div>
-
-                {/* Gallery previews */}
-                {galleryPreviews.length > 0 && (
-                  <div className="mt-4 grid grid-cols-3 gap-2">
-                    {galleryPreviews.map((preview, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={preview}
-                          alt={`Gallery ${index}`}
-                          className="h-24 w-full object-cover rounded-md"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeGalleryImage(index)}
-                          className="absolute top-1 right-1 bg-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <FiX size={16} />
-                        </button>
-                      </div>
-                    ))}
                   </div>
-                )}
+
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Added Sizes:
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {productData?.availableSizes?.map((variant, index) => (
+                        <div
+                          key={index}
+                          className="bg-gray-100 rounded-full px-3 py-1 flex items-center gap-1 justify-center"
+                        >
+                          <span className="font-medium">{variant?.color}</span>{" "}
+                          -<span className="font-medium">{variant?.size}</span>{" "}
+                          -
+                          <span className="text-gray-600">
+                            ({variant?.quantity})
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateSize(index)}
+                            className="text-gray-500 hover:text-red-500 ml-1 flex items-center"
+                          >
+                            <Edit2 size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSize(index)}
+                            className="text-gray-500 hover:text-red-500 ml-1 flex items-center"
+                          >
+                            <FiX size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Total Quantity
+                    </label>
+                    <input
+                      type="number"
+                      name="defaultQuantity"
+                      value={productData.defaultQuantity}
+                      onChange={handleChange}
+                      min="0"
+                      className="w-32 px-4 py-2 border rounded-lg bg-gray-50"
+                      disabled
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between space-x-4 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab(0)}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <FiArrowLeft /> Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab(2)}
+                  className="px-6 py-2 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 flex items-center gap-2"
+                >
+                  Next: Images <FiArrowRight />
+                </button>
               </div>
             </div>
-          </div>
+          )}
 
-          <div className="flex justify-end gap-4 mt-6">
-            <button
-              type="submit"
-              className="px-8 py-3 bg-red-500 text-white font-medium rounded-full hover:bg-red-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-              disabled={isSubmitting}
-            >
-              {isSubmitting
-                ? "Adding..."
-                : productID
-                ? "Update Product"
-                : "Add Product"}
-            </button>
-          </div>
+          {/* Tab 3: Images */}
+          {activeTab === 2 && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Primary Image */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4">
+                    Primary Image
+                  </h3>
+                  <div className="mt-1">
+                    <input
+                      type="file"
+                      ref={primaryFileInputRef}
+                      onChange={handlePrimaryImageChange}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => primaryFileInputRef.current.click()}
+                      className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 px-6 py-8 rounded-lg text-sm text-gray-500 hover:bg-gray-50"
+                    >
+                      {primaryImagePreview ? (
+                        <div className="w-full">
+                          <img
+                            src={primaryImagePreview}
+                            alt="Primary preview"
+                            className="h-48 mx-auto object-contain rounded-lg"
+                          />
+                          <p className="mt-2 text-center text-sm">
+                            Click to change image
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <FiUpload className="mx-auto h-12 w-12 text-gray-400" />
+                          <p className="mt-2 font-medium">
+                            Upload primary product image
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Recommended size: 800x800px
+                          </p>
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Gallery Images */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4">
+                    Gallery Images
+                  </h3>
+                  <div className="mt-1">
+                    <input
+                      type="file"
+                      ref={galleryFileInputRef}
+                      onChange={handleGalleryImagesChange}
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => galleryFileInputRef.current.click()}
+                      className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 px-6 py-8 rounded-lg text-sm text-gray-500 hover:bg-gray-50"
+                    >
+                      <div className="text-center">
+                        <FiUpload className="mx-auto h-12 w-12 text-gray-400" />
+                        <p className="mt-2 font-medium">
+                          Upload gallery images
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          You can select multiple images
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Gallery previews */}
+                    {galleryPreviews.length > 0 && (
+                      <div className="mt-4">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">
+                          Uploaded Gallery Images:
+                        </h4>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                          {galleryPreviews.map((preview, index) => (
+                            <div key={index} className="relative group">
+                              <img
+                                src={preview}
+                                alt={`Gallery ${index}`}
+                                className="h-24 w-full object-cover rounded-lg"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeGalleryImage(index)}
+                                className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition"
+                              >
+                                <FiX size={16} className="text-red-500" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between space-x-4 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab(1)}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <FiArrowLeft /> Back
+                </button>
+                <button
+                  type="submit"
+                  className="px-8 py-3 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 shadow-md hover:shadow-lg flex items-center gap-2"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting
+                    ? "Saving..."
+                    : productID
+                    ? "Update Product"
+                    : "Add Product"}
+                </button>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>

@@ -1,13 +1,11 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import {
-  Trash2,
-  Minus,
-  Plus,
-  ShoppingBag,
   ArrowRight,
   ChevronLeft,
+  ShoppingBag,
+  Trash2
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 function Cart() {
   const [cartItems, setCartItems] = useState(() => {
@@ -20,23 +18,23 @@ function Cart() {
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Increment quantity for the given product id.
-  const handleIncrement = (id) => {
-    const updatedCart = cartItems.map((item) =>
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    );
-    setCartItems(updatedCart);
-  };
+  // // Increment quantity for the given product id.
+  // const handleIncrement = (id) => {
+  //   const updatedCart = cartItems.map((item) =>
+  //     item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+  //   );
+  //   setCartItems(updatedCart);
+  // };
 
-  // Decrement quantity for the given product id (minimum 1).
-  const handleDecrement = (id) => {
-    const updatedCart = cartItems.map((item) =>
-      item.id === id && item.quantity > 1
-        ? { ...item, quantity: item.quantity - 1 }
-        : item
-    );
-    setCartItems(updatedCart);
-  };
+  // // Decrement quantity for the given product id (minimum 1).
+  // const handleDecrement = (id) => {
+  //   const updatedCart = cartItems.map((item) =>
+  //     item.id === id && item.quantity > 1
+  //       ? { ...item, quantity: item.quantity - 1 }
+  //       : item
+  //   );
+  //   setCartItems(updatedCart);
+  // };
 
   // Remove an item from the cart.
   const handleRemove = (id) => {
@@ -129,13 +127,24 @@ function Cart() {
                           ? item.discountedPrice
                           : item.price}
                       </span>
-                      {item.selectedSize ? (
+                      {item.selectedSize && item.selectedSize.size !== 'FREESIZE' ? (
                         <span className="ml-3">
                           size: {item.selectedSize.size}{" "}
-                          <small className="font-light">
+                          {/* <small className="font-light">
                             (Only {item.selectedSize.quantity} items are
                             available in stock)
-                          </small>
+                          </small> */}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                      {item.selectedSize && item.selectedSize.color !== 'NOCOLOR' ? (
+                        <span className="ml-3">
+                          color: {item.selectedSize.color}{" "}
+                          {/* <small className="font-light">
+                            (Only {item.selectedSize.quantity} items are
+                            available in stock)
+                          </small> */}
                         </span>
                       ) : (
                         ""
@@ -144,17 +153,17 @@ function Cart() {
 
                     <div className="flex items-center gap-4 mt-4">
                       <div className="flex items-center border border-gray-200 rounded-full overflow-hidden">
-                        <button
+                        {/* <button
                           className="p-2 hover:bg-gray-100 transition"
                           onClick={() => handleDecrement(item.id)}
                           aria-label="Decrease quantity"
                         >
                           <Minus className="h-4 w-4" />
-                        </button>
+                        </button> */}
                         <span className="px-4 font-medium">
-                          {item.quantity}
+                          Quantity: {item.quantity}
                         </span>
-                        <button
+                        {/* <button
                           className="p-2 hover:bg-gray-100 transition"
                           onClick={() => {
                             if (item.quantity < item.selectedSize.size) {
@@ -165,7 +174,7 @@ function Cart() {
                           aria-label="Increase quantity"
                         >
                           <Plus className="h-4 w-4" />
-                        </button>
+                        </button> */}
                       </div>
                       <span className="text-gray-500 text-sm">
                       Total: £{item.discountRate > 0

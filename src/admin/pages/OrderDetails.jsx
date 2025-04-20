@@ -1,7 +1,8 @@
 import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useReactToPrint } from "react-to-print";
 
 function OrderDetail() {
   const { orderId } = useParams();
@@ -10,6 +11,7 @@ function OrderDetail() {
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
   const [userRole, setUserRole] = useState("");
+  const printRef = useRef(null);
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
@@ -22,7 +24,6 @@ function OrderDetail() {
           throw new Error("Failed to fetch order details");
         }
         const data = await response.json();
-        console.log(data.order);
         setOrder(data.order);
       } catch (err) {
         console.error(err);
@@ -34,6 +35,13 @@ function OrderDetail() {
 
     fetchOrderDetail();
   }, [orderId]);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("isLogin"));
+    if (user) {
+      setUserRole(user.user?.role);
+    }
+  }, []);
 
   const updateOrderStatus = async (newStatus) => {
     if (
@@ -77,15 +85,12 @@ function OrderDetail() {
     }
   };
 
-  useEffect(() => {
-    return () => {
-      const user = JSON.parse(localStorage.getItem("isLogin"));
-      if (user) {
-        const storedProfile = JSON.parse(localStorage.getItem("isLogin")).user;
-        setUserRole(storedProfile.role);
-      }
-    };
-  }, []);
+  // Handle print functionality
+  const handlePrint = useReactToPrint({
+    // This is the key fix - ensure contentRef is properly passed
+    contentRef: printRef,
+    documentTitle: `Order-${orderId}`,
+  });
 
   return (
     <div className="space-y-8">
@@ -96,10 +101,18 @@ function OrderDetail() {
             className="text-blue-600 hover:text-blue-900 flex items-center"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to {userRole === "admin" ? "Orders" : "Profile"}
+            Back to {userRole === "user" ? "Profile" : "Order"}
           </Link>
           <h1 className="text-3xl font-serif">Order Details</h1>
         </div>
+        {!loading && !error && order && (
+          <button
+            onClick={handlePrint}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          >
+            Print Info / Save PDF
+          </button>
+        )}
       </div>
 
       {loading && (
@@ -115,127 +128,130 @@ function OrderDetail() {
       )}
 
       {!loading && !error && order && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-2xl font-medium">Order #{order._id}</h2>
-                  <p className="text-gray-500 mt-1">
-                    Placed on{" "}
-                    {format(
-                      new Date(order.createdAt),
-                      "MMMM dd, yyyy 'at' h:mm a"
-                    )}
-                  </p>
+        <div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-2xl font-medium">Order #{order._id}</h2>
+                    <p className="text-gray-500 mt-1">
+                      Placed on{" "}
+                      {format(
+                        new Date(order.createdAt),
+                        "MMMM dd, yyyy 'at' h:mm a"
+                      )}
+                    </p>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(
+                      order.status
+                    )}`}
+                  >
+                    {order.status}
+                  </span>
+
+                  {userRole === "admin" && (
+                    <select
+                      className="ml-2 border border-gray-300 p-1 rounded"
+                      value={order.status}
+                      onChange={(e) => updateOrderStatus(e.target.value)}
+                      disabled={updating || order.status === "delivered" || order.status === "cancelled"}
+                    >
+                      <option value="processing">Processing</option>
+                      <option value="out_for_delivery">Out for Delivery</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  )}
+                  {userRole === "user" && order.status === "processing" && (
+                    <button
+                      onClick={() => updateOrderStatus("cancelled")}
+                      className="ml-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                      disabled={updating}
+                    >
+                      Cancel Order
+                    </button>
+                  )}
                 </div>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(
-                    order.status
-                  )}`}
-                >
-                  {order.status}
-                </span>
-
-                {userRole === "admin" && (
-                  <select
-                    className="ml-2 border border-gray-300 p-1 rounded"
-                    value={order.status}
-                    onChange={(e) => updateOrderStatus(e.target.value)}
-                    disabled={updating}
-                  >
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="out_for_delivery">Out for Delivery</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                )}
-                {userRole === "user" && order.status === "processing" && (
-                  <button
-                    onClick={() => updateOrderStatus("cancelled")}
-                    className="ml-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                    disabled={updating}
-                  >
-                    Cancel Order
-                  </button>
-                )}
               </div>
-            </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-medium mb-4">Order Items</h3>
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Product
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                      Price
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                      Quantity
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      Subtotal
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {order?.items?.map((item) => (
-                    <tr key={item._id}>
-                      <td className="px-6 py-4 flex items-center">
-                        <img
-                          className="h-10 w-10 rounded-md mr-4"
-                          src={item.images.primary}
-                          alt={item.name}
-                        />
-                        <div>
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-medium mb-4">Order Items</h3>
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Product
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        Price
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        Quantity
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                        Subtotal
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {order?.items?.map((item) => (
+                      <tr key={item._id}>
+                        <td className="px-6 py-4 flex items-center">
+                          <img
+                            className="h-10 w-10 rounded-md mr-4"
+                            src={item.images.primary}
+                            alt={item.name}
+                          />
                           <div className="font-medium text-gray-900">
                             {item.name}
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        £{item.price.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 text-center">{item.quantity}</td>
-                      <td className="px-6 py-4 text-right font-medium">
-                        £{(item.price * item.quantity).toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-medium mb-4">Customer Information</h3>
-              <p>
-                Name: {order.customer?.firstName} {order.customer?.lastName}
-              </p>
-              <p>Email: {order.customer?.email}</p>
-              <p>Phone: {order.customer?.phone}</p>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          £{item.price.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          {item.quantity}
+                        </td>
+                        <td className="px-6 py-4 text-right font-medium">
+                          £{(item.price * item.quantity).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-medium mb-4">Shipping Address</h3>
-              <p>{order.customer.address.street}</p>
-              <p>
-                {order.customer.address.city}, {order.customer.address.state}
-                {order.customer.address.zip}
-              </p>
-              <p>{order.customer.address.country}</p>
-            </div>
+            <div className="space-y-6">
+              <div className="bg-white p-6 rounded-lg shadow-md" ref={printRef}>
+                <h3 className="text-lg font-medium mb-4">
+                  Customer Information
+                </h3>
+                <p>
+                  Name: {order.customer?.firstName} {order.customer?.lastName}
+                </p>
+                <p>Email: {order.customer?.email}</p>
+                <p>Phone: {order.customer?.phone}</p>
+              </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <div className="border-gray-200">
-                <div className="flex justify-between font-medium text-lg">
-                  <span>Total</span>
-                  <span>£{order.totalAmount.toFixed(2)}</span>
+              <div className="bg-white p-6 rounded-lg shadow-md" ref={printRef}>
+                <h3 className="text-lg font-medium mb-4">Shipping Address</h3>
+                <p>{order.customer.address.street}</p>
+                <p>
+                  {order.customer.address.city}, {order.customer.address.state}{" "}
+                  {order.customer.address.zip}
+                </p>
+                <p>{order.customer.address.country}</p>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="border-gray-200">
+                  <div className="flex justify-between font-medium text-lg">
+                    <span>Total</span>
+                    <span>£{order.totalAmount.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
             </div>
