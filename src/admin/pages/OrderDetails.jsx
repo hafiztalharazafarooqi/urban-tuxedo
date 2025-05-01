@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
+import OrderPrintTemplate from "../../components/OrderPrintTemplate";
 
 function OrderDetail() {
   const { orderId } = useParams();
@@ -156,7 +157,11 @@ function OrderDetail() {
                       className="ml-2 border border-gray-300 p-1 rounded"
                       value={order.status}
                       onChange={(e) => updateOrderStatus(e.target.value)}
-                      disabled={updating || order.status === "delivered" || order.status === "cancelled"}
+                      disabled={
+                        updating ||
+                        order.status === "delivered" ||
+                        order.status === "cancelled"
+                      }
                     >
                       <option value="processing">Processing</option>
                       <option value="out_for_delivery">Out for Delivery</option>
@@ -225,7 +230,7 @@ function OrderDetail() {
             </div>
 
             <div className="space-y-6">
-              <div className="bg-white p-6 rounded-lg shadow-md" ref={printRef}>
+              <div className="bg-white p-6 rounded-lg shadow-md">
                 <h3 className="text-lg font-medium mb-4">
                   Customer Information
                 </h3>
@@ -236,7 +241,7 @@ function OrderDetail() {
                 <p>Phone: {order.customer?.phone}</p>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md" ref={printRef}>
+              <div className="bg-white p-6 rounded-lg shadow-md">
                 <h3 className="text-lg font-medium mb-4">Shipping Address</h3>
                 <p>{order.customer.address.street}</p>
                 <p>
@@ -254,6 +259,11 @@ function OrderDetail() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+          <div style={{ display: "none" }}>
+            <div ref={printRef}>
+              <OrderPrintTemplate order={order} />
             </div>
           </div>
         </div>
