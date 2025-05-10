@@ -191,7 +191,7 @@ function Checkout() {
                     name="state"
                     value={formData.state}
                     onChange={handleChange}
-                    placeholder="State"
+                    placeholder="Country"
                     className="w-full px-4 py-2 border rounded-md"
                     required
                   />
@@ -200,7 +200,7 @@ function Checkout() {
                     name="zipCode"
                     value={formData.zipCode}
                     onChange={handleChange}
-                    placeholder="ZIP Code"
+                    placeholder="Postal Code"
                     className="w-full px-4 py-2 border rounded-md"
                     required
                   />
