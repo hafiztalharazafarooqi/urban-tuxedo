@@ -8,16 +8,22 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#1a1a1a',
-          light: '#2a2a2a',
+          DEFAULT: '#0F0F0F',
+          light: '#1B1B1B',
+        },
+        secondary: {
+          DEFAULT: '#1B1B1B',
+        },
+        accent: {
+          DEFAULT: '#C8A96B',
+          light: '#D3BA82',
         },
         gold: {
-          DEFAULT: '#D4AF37',
-          light: '#E5C158',
+          DEFAULT: '#C8A96B',
+          light: '#D3BA82',
         },
-        navy: {
-          DEFAULT: '#000080',
-          light: '#0000A0',
+        brandBg: {
+          DEFAULT: '#FAFAFA',
         }
       },
       fontFamily: {

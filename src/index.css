@@ -4,25 +4,94 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   body {
-    @apply bg-white text-primary font-sans;
+    @apply bg-brandBg text-primary font-sans antialiased overflow-x-hidden;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    @apply font-serif text-primary tracking-wide;
   }
 }
 
 @layer components {
   .btn {
-    @apply px-6 py-2 rounded-md transition-all duration-300 font-medium;
+    @apply px-8 py-3.5 transition-all duration-300 font-medium tracking-wider text-sm uppercase;
   }
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary-light;
+    @apply bg-primary text-white hover:bg-accent hover:text-primary border border-primary hover:border-accent;
+  }
+  .btn-secondary {
+    @apply bg-transparent text-primary hover:bg-primary hover:text-white border border-primary;
   }
   .btn-gold {
-    @apply bg-gold text-white hover:bg-gold-light;
+    @apply bg-accent text-primary hover:bg-primary hover:text-white border border-accent hover:border-primary;
   }
   .container-custom {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12;
   }
+  
+  /* Underline link effect */
+  .luxury-link {
+    @apply relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-right after:scale-x-0 after:bg-accent after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #FAFAFA;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #C8A96B;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #0F0F0F;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
 }

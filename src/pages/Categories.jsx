@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { FiFilter, FiX } from "react-icons/fi";
+import { useParams } from "react-router-dom";
+import { FiFilter, FiX, FiChevronRight } from "react-icons/fi";
+import ProductCard from "../components/ProductCard";
+import QuickViewModal from "../components/QuickViewModal";
 
 function Categories() {
   const { category } = useParams();
@@ -14,6 +16,7 @@ function Categories() {
   const [categoryList, setCategoryList] = useState([]);
   const [currentCategoryData, setCurrentCategoryData] = useState(null);
   const [categoryTree, setCategoryTree] = useState([]);
+  const [selectedQuickView, setSelectedQuickView] = useState(null);
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
@@ -42,25 +45,22 @@ function Categories() {
       });
       const data = await response.json();
 
-      // Create a flat list of all categories with proper mappings
       const formattedCategory = [
-        { id: "all", name: "All", slug: "all" }, // Ensure this is the first item
-        ...data.category.map((category) => ({
-          id: category._id,
-          name: category.name,
-          slug: category.slug,
-          parentCategory: category.parentCategory,
-          comingSoon: category.comingSoon || false,
+        { id: "all", name: "All Collections", slug: "all" },
+        ...data.category.map((cat) => ({
+          id: cat._id,
+          name: cat.name,
+          slug: cat.slug,
+          parentCategory: cat.parentCategory,
+          comingSoon: cat.comingSoon || false,
         })),
       ];
 
       setCategoryList(formattedCategory);
 
-      // Create tree structure
       const buildCategoryTree = () => {
-        // Find root level categories (those with no parent or parent is null)
         const rootCategories = [
-          { id: "all", name: "All", slug: "all" }, // Always include "All" at the root
+          { id: "all", name: "All Garments", slug: "all" },
           ...data.category
             .filter((cat) => !cat.parentCategory)
             .map((cat) => ({
@@ -73,10 +73,8 @@ function Categories() {
             })),
         ];
 
-        // Find children for each parent category
         rootCategories.forEach((parent) => {
           if (parent.id !== "all") {
-            // Skip "All" category
             parent.children = data.category
               .filter((cat) => cat.parentCategory === parent.id)
               .map((child) => ({
@@ -98,6 +96,7 @@ function Categories() {
       setError("Failed to load categories. Please try again later.");
     }
   };
+
   const applyFilters = useCallback(() => {
     let filtered = [...products];
 
@@ -113,6 +112,7 @@ function Categories() {
       (cat) => cat.slug === selectedCategory
     );
     setCurrentCategoryData(currentCategory);
+
     // Sorting
     if (sortBy === "price-low") {
       filtered.sort((a, b) => a.price - b.price);
@@ -137,7 +137,6 @@ function Categories() {
     applyFilters();
   }, [applyFilters]);
 
-  // Function to check if we should display "Coming Soon"
   const shouldShowComingSoon = () => {
     return (
       currentCategoryData &&
@@ -147,161 +146,193 @@ function Categories() {
   };
 
   return (
-    <div className="container-custom py-8">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-serif">Our Collection</h1>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="md:hidden btn btn-primary flex items-center gap-2"
-        >
-          {showFilters ? <FiX /> : <FiFilter />}
-          Filters
-        </button>
+    <div className="bg-brandBg min-h-screen pt-24 pb-16">
+      
+      {/* 1. Header Banner */}
+      <div className="bg-primary text-white py-16 mb-12 border-b border-white/5 relative overflow-hidden">
+        <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1600')" }} />
+        <div className="container-custom relative z-10 text-center space-y-3.5">
+          <span className="text-[10px] tracking-[0.3em] text-accent uppercase font-bold">
+            Urban Tuxedo
+          </span>
+          <h1 className="font-serif text-3xl md:text-5xl tracking-wide font-light">
+            {currentCategoryData ? currentCategoryData.name : "Sartorial Collections"}
+          </h1>
+          <p className="text-xs text-gray-300 max-w-md mx-auto font-light leading-relaxed">
+            Discover precision cuts, premium materials, and timeless structures detailed for luxury menswear.
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Filters - Desktop */}
-        <div
-          className={`${
-            showFilters ? "block" : "hidden"
-          } md:block w-full md:w-64 space-y-6`}
-        >
-          {/* Categories */}
-          <div className="space-y-2">
-            {categoryTree.map((category) => (
-              <div key={category.id}>
-                {/* Parent category */}
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="category"
-                    value={category.slug}
-                    checked={selectedCategory === category.slug}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="mr-2"
-                  />
-                  {category.name}
-                </label>
+      <div className="container-custom">
+        {/* Mobile controls */}
+        <div className="md:hidden flex justify-between items-center bg-white border border-gray-100 p-4 mb-6 shadow-sm">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-primary"
+          >
+            {showFilters ? <FiX size={16} /> : <FiFilter size={16} />}
+            <span>Filters</span>
+          </button>
 
-                {/* Child categories (indented) */}
-                {category.children && category.children.length > 0 && (
-                  <div className="ml-6 mt-1 space-y-1">
-                    {category.children.map((child) => (
-                      <label key={child.id} className="flex items-center">
-                        <input
-                          type="radio"
-                          name="category"
-                          value={child.slug}
-                          checked={selectedCategory === child.slug}
-                          onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="mr-2"
-                        />
-                        {child.name}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="border-none bg-transparent text-xs uppercase tracking-widest font-bold text-primary focus:ring-0 py-1"
+          >
+            <option value="featured">Featured</option>
+            <option value="price-low">Price: Low-High</option>
+            <option value="price-high">Price: High-Low</option>
+            <option value="newest">Newest Arrivals</option>
+          </select>
         </div>
 
-        {/* Products Grid */}
-        <div className="flex-1">
-          {/* Sort Options */}
-          <div className="flex justify-end mb-6">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="border rounded-md px-4 py-2"
-            >
-              <option value="featured">Featured</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="newest">Newest Arrivals</option>
-            </select>
-          </div>
+        <div className="flex flex-col md:flex-row gap-12">
+          
+          {/* 2. Filters Sidebar */}
+          <div
+            className={`w-full md:w-64 flex-shrink-0 space-y-8 ${
+              showFilters ? "block" : "hidden md:block"
+            }`}
+          >
+            <div className="bg-white border border-gray-100 p-6 md:p-8 space-y-6 shadow-sm sticky top-28">
+              <h3 className="font-serif text-sm font-semibold tracking-wider text-primary uppercase border-b border-gray-100 pb-3">
+                Collections
+              </h3>
 
-          {/* Products or Coming Soon message */}
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="bg-gray-200 h-80 rounded-lg mb-4"></div>
-                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
-                  <div className="h-10 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-          ) : shouldShowComingSoon() ? (
-            <div className="flex flex-col items-center justify-center w-full py-16">
-              <h2 className="text-3xl font-serif text-center mb-4">
-                Coming Soon
-              </h2>
-              <p className="text-gray-600 text-center max-w-md">
-                We&apos;re working on adding products to this category. Please
-                check back later or explore our other collections.
-              </p>
-            </div>
-          ) : filteredProducts.length === 0 ? (
-            <p className="text-red-500 text-center w-full">
-              {error || "No products found in this category."}
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {filteredProducts.map((item) => (
-                <Link
-                  key={item._id}
-                  to={`/product/${item._id}`}
-                  className="group"
-                >
-                  <div className="bg-white shadow-lg rounded-lg overflow-hidden h-full">
-                    <div className="relative overflow-hidden">
-                      <img
-                        src={item.images.primary}
-                        alt="Product"
-                        className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+              <div className="space-y-4">
+                {categoryTree.map((cat) => (
+                  <div key={cat.id} className="space-y-2.5">
+                    {/* Parent Category Option */}
+                    <label className="flex items-center group cursor-pointer">
+                      <input
+                        type="radio"
+                        name="category"
+                        value={cat.slug}
+                        checked={selectedCategory === cat.slug}
+                        onChange={(e) => {
+                          setSelectedCategory(e.target.value);
+                          if (window.innerWidth < 768) setShowFilters(false);
+                        }}
+                        className="h-3.5 w-3.5 text-accent border-gray-300 focus:ring-accent accent-accent"
                       />
+                      <span className={`ml-3 text-xs tracking-wider uppercase font-medium transition-colors ${
+                        selectedCategory === cat.slug ? "text-accent font-semibold" : "text-gray-500 group-hover:text-primary"
+                      }`}>
+                        {cat.name}
+                      </span>
+                    </label>
 
-                      {/* Discount percentage badge/splodge */}
-                      {item.discountRate > 0 && (
-                        <div className="absolute top-0 right-0 bg-red-500 text-white font-bold rounded-bl-lg px-3 py-1">
-                          -{item.discountRate}%
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-serif text-lg mb-2 truncate">
-                        {item.title}
-                      </h3>
-
-                      {/* Price display logic */}
-                      {item.discountRate > 0 ? (
-                        <div className="mb-2">
-                          <span className="text-gray-500 line-through mr-2">
-                            £{item.price}
-                          </span>
-                          <span className="text-red-600 font-semibold">
-                            £{item.discountedPrice}
-                          </span>
-                        </div>
-                      ) : (
-                        <p className="text-gray-600 mb-2">£{item.price}</p>
-                      )}
-
-                      <button className="btn btn-primary w-full">
-                        View Details
-                      </button>
-                    </div>
+                    {/* Children Category Options */}
+                    {cat.children && cat.children.length > 0 && (
+                      <div className="pl-6 flex flex-col space-y-2 border-l border-gray-100">
+                        {cat.children.map((child) => (
+                          <label key={child.id} className="flex items-center group cursor-pointer">
+                            <input
+                              type="radio"
+                              name="category"
+                              value={child.slug}
+                              checked={selectedCategory === child.slug}
+                              onChange={(e) => {
+                                setSelectedCategory(e.target.value);
+                                if (window.innerWidth < 768) setShowFilters(false);
+                              }}
+                              className="h-3 w-3 text-accent border-gray-300 focus:ring-accent accent-accent"
+                            />
+                            <span className={`ml-3 text-[11px] tracking-wider transition-colors ${
+                              selectedCategory === child.slug ? "text-accent font-semibold" : "text-gray-400 group-hover:text-primary"
+                            }`}>
+                              {child.name}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </Link>
-              ))}
+                ))}
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* 3. Products Grid Area */}
+          <div className="flex-1 space-y-6">
+            
+            {/* Desktop Sorting header */}
+            <div className="hidden md:flex justify-between items-center border-b border-gray-100 pb-4">
+              <span className="text-[11px] uppercase tracking-widest text-gray-400 font-semibold">
+                Showing {filteredProducts.length} Items
+              </span>
+
+              <div className="flex items-center gap-2.5">
+                <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
+                  Sort By:
+                </span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary focus:ring-accent focus:border-accent"
+                >
+                  <option value="featured">Featured</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="newest">Newest Arrivals</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Main grid loader / elements */}
+            {loading ? (
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="animate-pulse bg-white border border-gray-100 p-4">
+                    <div className="bg-gray-100 aspect-[3/4] mb-4" />
+                    <div className="h-4 bg-gray-100 w-1/3 mx-auto mb-2" />
+                    <div className="h-4 bg-gray-100 w-2/3 mx-auto mb-2" />
+                    <div className="h-4 bg-gray-100 w-1/4 mx-auto" />
+                  </div>
+                ))}
+              </div>
+            ) : shouldShowComingSoon() ? (
+              <div className="flex flex-col items-center justify-center py-24 bg-white border border-gray-100 text-center px-6">
+                <span className="text-[10px] tracking-[0.3em] text-accent uppercase font-bold mb-3 block">
+                  Collection Pipeline
+                </span>
+                <h2 className="font-serif text-2xl text-primary mb-3">
+                  Coming Soon
+                </h2>
+                <p className="text-gray-400 text-xs max-w-sm mx-auto leading-relaxed">
+                  We are currently hand-crafting new garments for this signature collection. Please check back shortly or explore our active catalogs.
+                </p>
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 bg-white border border-gray-100 text-center px-6">
+                <p className="text-gray-400 text-xs mb-4">
+                  {error || "No tailoring found matching this selection."}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                {filteredProducts.map((item) => (
+                  <ProductCard
+                    key={item._id}
+                    product={item}
+                    onQuickView={(p) => setSelectedQuickView(p)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
+
+      {/* Quick View Modal Overlay */}
+      {selectedQuickView && (
+        <QuickViewModal
+          product={selectedQuickView}
+          onClose={() => setSelectedQuickView(null)}
+        />
+      )}
     </div>
   );
 }
