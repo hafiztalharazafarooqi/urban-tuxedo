@@ -5,7 +5,6 @@ import { FiTrash2, FiUpload } from "react-icons/fi";
 const uploadImage = async (file) => {
   if (!file) return null;
 
-  // const apiKey = "87b38229ce97791b612d8ccae0d12b16"; // Replace with your ImgBB API key
   const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
 
   const formData = new FormData();
@@ -288,8 +287,8 @@ const PromotionsManager = ({ onClose }) => {
                             onClick={() => handleReorder(promo.id, "up")}
                             disabled={index === 0}
                             className={`p-1 rounded ${index === 0
-                                ? "text-gray-300"
-                                : "text-gray-600 hover:bg-gray-200"
+                              ? "text-gray-300"
+                              : "text-gray-600 hover:bg-gray-200"
                               }`}
                           >
                             ↑
@@ -299,8 +298,8 @@ const PromotionsManager = ({ onClose }) => {
                             onClick={() => handleReorder(promo.id, "down")}
                             disabled={index === promotions.length - 1}
                             className={`p-1 rounded ${index === promotions.length - 1
-                                ? "text-gray-300"
-                                : "text-gray-600 hover:bg-gray-200"
+                              ? "text-gray-300"
+                              : "text-gray-600 hover:bg-gray-200"
                               }`}
                           >
                             ↓

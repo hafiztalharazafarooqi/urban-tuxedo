@@ -12,7 +12,6 @@ import {
 const uploadImage = async (file) => {
   if (!file) return null;
 
-  // const apiKey = "87b38229ce97791b612d8ccae0d12b16"; // Replace with your ImgBB API key
   const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
 
   const formData = new FormData();
@@ -448,8 +447,8 @@ const AddProductForm = ({ onAddProduct, productID }) => {
             <button
               onClick={() => setActiveTab(0)}
               className={`px-6 py-3 font-medium text-sm ${activeTab === 0
-                  ? "border-b-2 border-red-500 text-red-600"
-                  : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2 border-red-500 text-red-600"
+                : "text-gray-500 hover:text-gray-700"
                 }`}
             >
               Basic Info
@@ -457,8 +456,8 @@ const AddProductForm = ({ onAddProduct, productID }) => {
             <button
               onClick={() => setActiveTab(1)}
               className={`px-6 py-3 font-medium text-sm ${activeTab === 1
-                  ? "border-b-2 border-red-500 text-red-600"
-                  : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2 border-red-500 text-red-600"
+                : "text-gray-500 hover:text-gray-700"
                 }`}
             >
               Price & Inventory
@@ -466,8 +465,8 @@ const AddProductForm = ({ onAddProduct, productID }) => {
             <button
               onClick={() => setActiveTab(2)}
               className={`px-6 py-3 font-medium text-sm ${activeTab === 2
-                  ? "border-b-2 border-red-500 text-red-600"
-                  : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2 border-red-500 text-red-600"
+                : "text-gray-500 hover:text-gray-700"
                 }`}
             >
               Images
