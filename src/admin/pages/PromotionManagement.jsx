@@ -5,7 +5,8 @@ import { FiTrash2, FiUpload } from "react-icons/fi";
 const uploadImage = async (file) => {
   if (!file) return null;
 
-  const apiKey = "87b38229ce97791b612d8ccae0d12b16"; // Replace with your ImgBB API key
+  // const apiKey = "87b38229ce97791b612d8ccae0d12b16"; // Replace with your ImgBB API key
+  const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
 
   const formData = new FormData();
   formData.append("image", file);
@@ -56,7 +57,7 @@ const PromotionsManager = ({ onClose }) => {
 
       // Sort by order before setting
       normalizedPromotions.sort((a, b) => a.order - b.order);
-  
+
       setPromotions(normalizedPromotions);
     } catch (error) {
       console.error("Error fetching promotions:", error);
@@ -176,7 +177,7 @@ const PromotionsManager = ({ onClose }) => {
       setIsSaving(false);
     }
   };
-  
+
 
   return (
     <div>
@@ -286,11 +287,10 @@ const PromotionsManager = ({ onClose }) => {
                             type="button"
                             onClick={() => handleReorder(promo.id, "up")}
                             disabled={index === 0}
-                            className={`p-1 rounded ${
-                              index === 0
+                            className={`p-1 rounded ${index === 0
                                 ? "text-gray-300"
                                 : "text-gray-600 hover:bg-gray-200"
-                            }`}
+                              }`}
                           >
                             ↑
                           </button>
@@ -298,11 +298,10 @@ const PromotionsManager = ({ onClose }) => {
                             type="button"
                             onClick={() => handleReorder(promo.id, "down")}
                             disabled={index === promotions.length - 1}
-                            className={`p-1 rounded ${
-                              index === promotions.length - 1
+                            className={`p-1 rounded ${index === promotions.length - 1
                                 ? "text-gray-300"
                                 : "text-gray-600 hover:bg-gray-200"
-                            }`}
+                              }`}
                           >
                             ↓
                           </button>

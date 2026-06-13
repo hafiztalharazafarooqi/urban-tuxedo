@@ -12,7 +12,8 @@ import {
 const uploadImage = async (file) => {
   if (!file) return null;
 
-  const apiKey = "87b38229ce97791b612d8ccae0d12b16"; // Replace with your ImgBB API key
+  // const apiKey = "87b38229ce97791b612d8ccae0d12b16"; // Replace with your ImgBB API key
+  const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
 
   const formData = new FormData();
   formData.append("image", file);
@@ -100,26 +101,26 @@ const AddProductForm = ({ onAddProduct, productID }) => {
 
   const handleAddSize = () => {
     if (sizeQuantityInput <= 0) return;
-  
+
     const trimmedColor = colorInput.trim();
     const trimmedSize = sizeInput.trim();
-  
+
     const isColorMissing = !trimmedColor;
     const isSizeMissing = !trimmedSize;
-  
+
     const color = isColorMissing ? "NOCOLOR" : trimmedColor;
     const size = isSizeMissing ? "FREESIZE" : trimmedSize;
-  
+
     const newSizeEntry = {
       color,
       size,
       quantity: sizeQuantityInput,
     };
-  
+
     setProductData((prevData) => {
       let updatedSizes = [...prevData.availableSizes];
       let updatedDefaultQuantity = prevData.defaultQuantity;
-  
+
       // If editing existing size (sizeId is an index or unique ID)
       if (sizeId != '') {
         const index = updatedSizes.findIndex((item) => item._id === sizeId);
@@ -137,21 +138,21 @@ const AddProductForm = ({ onAddProduct, productID }) => {
         updatedSizes.push(newSizeEntry);
         updatedDefaultQuantity += Number(sizeQuantityInput);
       }
-  
+
       return {
         ...prevData,
         availableSizes: updatedSizes,
         defaultQuantity: updatedDefaultQuantity,
       };
     });
-  
+
     // Reset inputs
     setColorInput("");
     setSizeInput("");
     setSizeQuantityInput(1);
     setSizeId(''); // Clear edit state
   };
-  
+
 
   const handleRemoveSize = (index) => {
     const selectedSize = productData.availableSizes[index];
@@ -170,7 +171,7 @@ const AddProductForm = ({ onAddProduct, productID }) => {
 
   const handleUpdateSize = (index) => {
     const selectedSize = productData.availableSizes[index];
-   
+
     const size = selectedSize.size === "FREESIZE" ? '' : selectedSize.size;
     const color = selectedSize.color === "NOCOLOR" ? '' : selectedSize.color;
     setSizeInput(size);
@@ -446,31 +447,28 @@ const AddProductForm = ({ onAddProduct, productID }) => {
           <div className="flex border-b">
             <button
               onClick={() => setActiveTab(0)}
-              className={`px-6 py-3 font-medium text-sm ${
-                activeTab === 0
+              className={`px-6 py-3 font-medium text-sm ${activeTab === 0
                   ? "border-b-2 border-red-500 text-red-600"
                   : "text-gray-500 hover:text-gray-700"
-              }`}
+                }`}
             >
               Basic Info
             </button>
             <button
               onClick={() => setActiveTab(1)}
-              className={`px-6 py-3 font-medium text-sm ${
-                activeTab === 1
+              className={`px-6 py-3 font-medium text-sm ${activeTab === 1
                   ? "border-b-2 border-red-500 text-red-600"
                   : "text-gray-500 hover:text-gray-700"
-              }`}
+                }`}
             >
               Price & Inventory
             </button>
             <button
               onClick={() => setActiveTab(2)}
-              className={`px-6 py-3 font-medium text-sm ${
-                activeTab === 2
+              className={`px-6 py-3 font-medium text-sm ${activeTab === 2
                   ? "border-b-2 border-red-500 text-red-600"
                   : "text-gray-500 hover:text-gray-700"
-              }`}
+                }`}
             >
               Images
             </button>
@@ -854,8 +852,8 @@ const AddProductForm = ({ onAddProduct, productID }) => {
                   {isSubmitting
                     ? "Saving..."
                     : productID
-                    ? "Update Product"
-                    : "Add Product"}
+                      ? "Update Product"
+                      : "Add Product"}
                 </button>
               </div>
             </div>
