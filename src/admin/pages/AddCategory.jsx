@@ -5,7 +5,7 @@ import { FiUpload, FiX } from "react-icons/fi";
 const uploadImage = async (file) => {
   if (!file) return null;
 
-  const apiKey = "87b38229ce97791b612d8ccae0d12b16"; // Replace with your ImgBB API key
+  const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
 
   const formData = new FormData();
   formData.append("image", file);
@@ -377,8 +377,8 @@ const AddCategoryForm = ({ onAddCategory, categoryID }) => {
                   ? "Updating..."
                   : "Adding..."
                 : categoryID
-                ? "Update Category"
-                : "Add Category"}
+                  ? "Update Category"
+                  : "Add Category"}
             </button>
           </div>
         </form>
